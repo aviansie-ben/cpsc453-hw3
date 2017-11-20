@@ -60,7 +60,7 @@ namespace hw3 {
             this->m_key_callback = std::move(callback);
         }
 
-        void do_main_loop(std::function<void()> callback);
+        void do_main_loop(std::function<void(double)> callback);
     };
 
     class Cursor {

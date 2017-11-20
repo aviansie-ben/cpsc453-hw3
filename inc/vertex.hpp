@@ -54,6 +54,8 @@ namespace hw3 {
         void load_data(std::initializer_list<T> data, GLenum usage) {
             this->load_data(data.begin(), data.size() * sizeof(T), usage);
         }
+
+        operator bool() const { return this->m_id != 0; }
     };
 
     class GlVertexArray {
@@ -92,7 +94,7 @@ namespace hw3 {
 
         void draw(PrimitiveType type) const;
         void draw(int first, size_t n, PrimitiveType type) const;
-        void draw_indexed(int buffer_index, int first, size_t n, PrimitiveType type) const;
+        void draw_indexed(const GlBuffer& buffer, int first, size_t n, PrimitiveType type) const;
     };
 }
 

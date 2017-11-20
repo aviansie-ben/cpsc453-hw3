@@ -91,6 +91,9 @@ namespace hw3 {
         size_t start,
         int buffer_index
     ) {
+        assert(*this);
+        assert(buffer_index >= 0 && static_cast<size_t>(buffer_index) < this->m_buffers.size());
+
         glBindVertexArray(this->m_id);
         glBindBuffer(GL_ARRAY_BUFFER, this->m_buffers[buffer_index].id());
 
@@ -115,15 +118,20 @@ namespace hw3 {
     }
 
     void GlVertexArray::draw(int first, size_t n, PrimitiveType type) const {
+        assert(*this);
+
         glBindVertexArray(this->m_id);
         glDrawArrays((GLenum)type, first, n);
         handle_errors();
     }
 
-    void GlVertexArray::draw_indexed(int buffer_index, int first, size_t n, PrimitiveType type) const {
+    void GlVertexArray::draw_indexed(const GlBuffer& buffer, int first, size_t n, PrimitiveType type) const {
+        assert(*this);
+        assert(buffer);
+
         glBindVertexArray(this->m_id);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->buffer(buffer_index).id());
-        glDrawElements((GLenum)type, n, GL_UNSIGNED_SHORT, (void*)(intptr_t)first);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.id());
+        glDrawElements((GLenum)type, n, GL_UNSIGNED_INT, (void*)(intptr_t)first);
         handle_errors();
     }
 }

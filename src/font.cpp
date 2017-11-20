@@ -25,7 +25,7 @@ namespace hw3 {
         shaders::font_program.set_uniform("vertex_transform", transform);
         shaders::font_program.use();
 
-        this->m_vertex_array.draw_indexed(1, 0, this->m_vertex_array.size(), PrimitiveType::TRIANGLES);
+        this->m_vertex_array.draw_indexed(this->m_vertex_array.buffer(1), 0, this->m_vertex_array.size(), PrimitiveType::TRIANGLES);
     }
 
     const FontGlyph& Font::glyph(int c) const {

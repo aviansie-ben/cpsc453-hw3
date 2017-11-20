@@ -112,12 +112,19 @@ namespace hw3 {
         }
     }
 
-    void Window::do_main_loop(std::function<void()> callback) {
+    void Window::do_main_loop(std::function<void(double)> callback) {
+        double prevTime = glfwGetTime();
+        double nextTime = prevTime;
+
         while (!glfwWindowShouldClose(this->m_ptr)) {
-            callback();
+            callback(nextTime - prevTime);
+
+            prevTime = nextTime;
 
             glfwSwapBuffers(this->m_ptr);
             glfwPollEvents();
+
+            nextTime = glfwGetTime();
         }
     }
 
