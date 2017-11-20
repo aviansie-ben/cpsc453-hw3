@@ -16,6 +16,16 @@
 #include "window.hpp"
 
 namespace hw3 {
+    constexpr float default_fov = tau / 6;
+
+    static float calculate_camera_distance(const AABB& bounding_box, float fov) {
+        // Start by turning the bounding box into a bounding sphere.
+        float bound_radius = glm::distance(bounding_box.min(), bounding_box.center());
+
+        // Now calculate the distance the camera must be to show the entire bounding sphere.
+        return bound_radius / std::tan(fov / 2);
+    }
+
     extern "C" int main(int argc, char** argv) {
         if (argc != 2) {
             std::cerr << "Usage: " << argv[0] << " [object file]" << std::endl;
@@ -63,19 +73,22 @@ namespace hw3 {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         float angle = 0.0;
+        float distance = calculate_camera_distance(m.bounding_box(), default_fov);
+
+        distance *= std::sqrt(2);
 
         window.do_main_loop([&](double delta_t) {
             angle += (tau / 10) * delta_t;
 
             auto projMatrix = glm::perspective(
-                glm::radians(90.0f),
+                default_fov,
                 window_size.x / window_size.y,
                 0.1f,
                 100.0f
             );
             auto viewMatrix = glm::lookAt(
-                glm::vec3(std::sin(angle), 1, std::cos(angle)),
-                glm::vec3(0, 0, 0),
+                m.bounding_box().center() + glm::vec3(std::sin(angle) * distance, distance, std::cos(angle) * distance),
+                m.bounding_box().center(),
                 glm::vec3(0, 1, 0)
             );
 
