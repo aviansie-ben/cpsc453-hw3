@@ -43,7 +43,7 @@ namespace hw3 {
     }
 
     void World::draw() const {
-        ShaderProgram& program = shaders::normal_program;
+        ShaderProgram& program = shaders::phong_program;
         auto view_projection_matrix = this->camera().view_projection_matrix();
 
         program.set_uniform("camera_position", this->camera().pos());

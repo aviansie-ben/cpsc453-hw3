@@ -16,6 +16,7 @@ namespace hw3 {
             extern const char* fragment_fixed;
             extern const char* fragment_font;
             extern const char* fragment_normal;
+            extern const char* fragment_phong;
             extern const char* fragment_textured;
 
         }
@@ -23,6 +24,7 @@ namespace hw3 {
         extern ShaderProgram fixed_program;
         extern ShaderProgram font_program;
         extern ShaderProgram normal_program;
+        extern ShaderProgram phong_program;
         extern ShaderProgram textured_program;
 
         void init();
