@@ -110,9 +110,11 @@ namespace hw3 {
         std::vector<std::unique_ptr<Object>> m_objects;
         std::vector<std::unique_ptr<PointLight>> m_point_lights;
 
+        bool m_lighting_enabled;
+
         Camera m_camera;
     public:
-        World() {};
+        World() : m_lighting_enabled(true) {};
 
         std::vector<std::unique_ptr<Object>>& objects() { return this->m_objects; }
         const std::vector<std::unique_ptr<Object>>& objects() const { return this->m_objects; }
@@ -120,6 +122,12 @@ namespace hw3 {
         std::vector<std::unique_ptr<PointLight>>& point_lights() { return this->m_point_lights; }
         const std::vector<std::unique_ptr<PointLight>>& point_lights() const {
             return this->m_point_lights;
+        }
+
+        bool lighting_enabled() const { return this->m_lighting_enabled; }
+        World& lighting_enabled(bool lighting_enabled) {
+            this->m_lighting_enabled = lighting_enabled;
+            return *this;
         }
 
         Camera& camera() { return this->m_camera; }

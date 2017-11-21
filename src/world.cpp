@@ -52,15 +52,21 @@ namespace hw3 {
             throw std::runtime_error("Too many point lights");
         }
 
-        program.set_uniform("num_point_lights", static_cast<int>(this->m_point_lights.size()));
-        for (size_t i = 0; i < this->m_point_lights.size(); i++) {
-            program.set_uniform(([&]() {
-                std::ostringstream ss;
+        if (this->m_lighting_enabled) {
+            program.set_uniform("scene_ambient", glm::vec3(0));
+            program.set_uniform("num_point_lights", static_cast<int>(this->m_point_lights.size()));
+            for (size_t i = 0; i < this->m_point_lights.size(); i++) {
+                program.set_uniform(([&]() {
+                    std::ostringstream ss;
 
-                ss << "point_lights[" << i << "]";
+                    ss << "point_lights[" << i << "]";
 
-                return ss.str();
-            })(), *this->m_point_lights[i]);
+                    return ss.str();
+                })(), *this->m_point_lights[i]);
+            }
+        } else {
+            program.set_uniform("scene_ambient", glm::vec3(1));
+            program.set_uniform("num_point_lights", 0);
         }
 
         for (const auto& obj : this->m_objects) {

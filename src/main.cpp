@@ -113,6 +113,15 @@ namespace hw3 {
         });
 
         window.set_key_callback([&](int key, int action, int mods) {
+            if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+                world.lighting_enabled(!world.lighting_enabled());
+
+                if (world.lighting_enabled()) {
+                    std::cout << "Lighting enabled" << std::endl;
+                } else {
+                    std::cout << "Lighting disabled" << std::endl;
+                }
+            }
         });
 
         // We will be using the alpha channel, so we need to enable the correct blending mode.
