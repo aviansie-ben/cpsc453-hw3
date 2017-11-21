@@ -153,6 +153,16 @@ namespace hw3 {
         handle_errors();
     }
 
+    void ShaderProgram::set_uniform(std::string name, int value) {
+        GLint loc = glGetUniformLocation(this->m_id, name.c_str());
+
+        if (loc != -1) {
+           glProgramUniform1i(this->m_id, loc, value);
+        }
+
+        handle_errors();
+    }
+
     void ShaderProgram::set_uniform(std::string name, glm::vec2 value) {
         GLint loc = glGetUniformLocation(this->m_id, name.c_str());
 
@@ -178,6 +188,16 @@ namespace hw3 {
 
         if (loc != -1) {
            glProgramUniform4f(this->m_id, loc, value.x, value.y, value.z, value.w);
+        }
+
+        handle_errors();
+    }
+
+    void ShaderProgram::set_uniform(std::string name, const glm::mat3& value) {
+        GLint loc = glGetUniformLocation(this->m_id, name.c_str());
+
+        if (loc != -1) {
+           glProgramUniformMatrix3fv(this->m_id, loc, 1, GL_TRUE, glm::value_ptr(value));
         }
 
         handle_errors();

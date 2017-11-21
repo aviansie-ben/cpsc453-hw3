@@ -60,6 +60,7 @@ namespace hw3 {
         GLuint id() const { return this->m_id; }
 
         static Texture2D load_from_file(std::string path);
+        static std::shared_ptr<Texture2D> single_pixel();
     };
 
     class Sampler2D {

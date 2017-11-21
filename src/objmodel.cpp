@@ -10,6 +10,20 @@
 #include "shaderimpl.hpp"
 
 namespace hw3 {
+    void ShaderProgram::uniform_setter<Material>::operator ()(
+        ShaderProgram& program, std::string name, const Material& value
+    ) {
+        program.set_uniform(name + ".ambient", value.ambient);
+
+        program.set_uniform(name + ".diffuse", value.diffuse);
+        program.set_uniform(name + ".diffuse_map", &value.diffuse_map);
+
+        program.set_uniform(name + ".specular", value.specular);
+        program.set_uniform(name + ".specular_map", &value.specular_map);
+
+        program.set_uniform(name + ".shininess", value.shininess);
+    }
+
     struct Model3DVertex {
         glm::vec3 pos;
         glm::vec2 tex;
@@ -255,15 +269,13 @@ namespace hw3 {
         loader.finish();
 
         this->m_vertices.bind_attribute(0, 3, DataType::FLOAT, sizeof(Model3DVertex), offsetof(Model3DVertex, pos), 0);
+        this->m_vertices.bind_attribute(1, 2, DataType::FLOAT, sizeof(Model3DVertex), offsetof(Model3DVertex, tex), 0);
+        this->m_vertices.bind_attribute(2, 3, DataType::FLOAT, sizeof(Model3DVertex), offsetof(Model3DVertex, norm), 0);
 
         return *this;
     }
 
-    void Model3D::draw(const glm::mat4& transform) const {
-        shaders::fixed_program.set_uniform("fixed_color", glm::vec4(1));
-        shaders::fixed_program.set_uniform("vertex_transform", transform);
-        shaders::fixed_program.use();
-
+    void Model3D::draw() const {
         for (const ModelSubObject3D& so : this->m_sub_objects) {
             this->m_vertices.draw_indexed(so.index_buffer, 0, so.num_indices, PrimitiveType::TRIANGLES);
         }

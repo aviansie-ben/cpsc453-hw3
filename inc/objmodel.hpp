@@ -7,6 +7,7 @@
 #include <boost/filesystem.hpp>
 #include <glm/glm.hpp>
 
+#include "shader.hpp"
 #include "texture.hpp"
 #include "vertex.hpp"
 
@@ -23,6 +24,23 @@ namespace hw3 {
 
         glm::vec3 size() const { return this->m_max - this->m_min; }
         glm::vec3 center() const { return (this->m_min + this->m_max) / 2.0f; }
+    };
+
+    struct Material {
+        glm::vec3 ambient;
+
+        glm::vec3 diffuse;
+        Sampler2D diffuse_map;
+
+        glm::vec3 specular;
+        Sampler2D specular_map;
+
+        float shininess;
+    };
+
+    template <>
+    struct ShaderProgram::uniform_setter<Material> {
+        void operator ()(ShaderProgram& program, std::string name, const Material& value);
     };
 
     struct ModelSubObject3D {
@@ -54,7 +72,7 @@ namespace hw3 {
 
         const AABB& bounding_box() const { return this->m_bounding_box; }
 
-        void draw(const glm::mat4& transform) const;
+        void draw() const;
 
         friend class Model3DLoader;
     };

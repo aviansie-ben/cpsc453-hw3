@@ -6,6 +6,8 @@
 #include "texture.hpp"
 
 namespace hw3 {
+    static std::shared_ptr<Texture2D> single_pixel_texture;
+
     Texture2D::Texture2D(Texture2D&& other)
         : m_id(other.m_id), m_width(other.m_width), m_height(other.m_height) {
         other.m_id = 0;
@@ -113,6 +115,27 @@ namespace hw3 {
         stbi_image_free(data);
 
         return std::move(tex);
+    }
+
+    std::shared_ptr<Texture2D> Texture2D::single_pixel() {
+        if (!single_pixel_texture) {
+            char data[4] = {
+                static_cast<char>(0xff),
+                static_cast<char>(0xff),
+                static_cast<char>(0xff),
+                static_cast<char>(0xff)
+            };
+
+            single_pixel_texture = std::make_shared<Texture2D>();
+            single_pixel_texture->load_data(
+                data,
+                TextureDataFormat::RGBA,
+                1,
+                1
+            );
+        }
+
+        return single_pixel_texture;
     }
 
     Sampler2D::Sampler2D(Sampler2D&& other)

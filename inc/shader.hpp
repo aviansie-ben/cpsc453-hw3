@@ -70,11 +70,25 @@ namespace hw3 {
         ShaderProgram& operator =(ShaderProgram&& other);
 
         void set_uniform(std::string name, float value);
+        void set_uniform(std::string name, int value);
         void set_uniform(std::string name, glm::vec2 value);
         void set_uniform(std::string name, glm::vec3 value);
         void set_uniform(std::string name, glm::vec4 value);
+        void set_uniform(std::string name, const glm::mat3& value);
         void set_uniform(std::string name, const glm::mat4& value);
         void set_uniform(std::string name, const Sampler2D* value);
+
+        template <typename T>
+        struct uniform_setter {
+            void operator()(ShaderProgram& program, std::string name, const T& value) const {
+                static_assert(sizeof(T) == 0, "Unsupported type for uniform_setter");
+            }
+        };
+
+        template <typename T>
+        void set_uniform(std::string name, const T& value) {
+            uniform_setter<T>()(*this, name, value);
+        }
 
         int patch_size() const { return this->m_patch_size; }
         void patch_size(int size) { this->m_patch_size = size; }

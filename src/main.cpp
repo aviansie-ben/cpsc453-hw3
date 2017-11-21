@@ -14,6 +14,7 @@
 #include "shaderimpl.hpp"
 #include "texture.hpp"
 #include "window.hpp"
+#include "world.hpp"
 
 namespace hw3 {
     constexpr float default_fov = tau / 6;
@@ -45,14 +46,54 @@ namespace hw3 {
 
         shaders::init();
 
-        Model3D m;
+        std::shared_ptr<Model3D> model = std::make_shared<Model3D>();
 
-        m.load_geometry(boost::filesystem::path(argv[1]));
+        model->load_geometry(boost::filesystem::path(argv[1]));
 
-        std::cout << "Loaded " << m.num_vertices() << " vertices from " << argv[1] << std::endl;
+        std::cout << "Loaded " << model->num_vertices() << " vertices from " << argv[1] << std::endl;
+
+        World world;
 
         glm::vec2 window_size = glm::vec2(window.size());
-        glm::vec2 inverse_window_size = glm::vec2(1.0) / window_size;
+
+        world.camera().projection_matrix(glm::perspective(
+            default_fov,
+            window_size.x / window_size.y,
+            0.1f,
+            100.0f
+        ));
+
+        world.objects().emplace_back(([&]() {
+            auto obj = std::make_unique<Object>(
+                model,
+                Material {
+                    .ambient = glm::vec3(0.5),
+
+                    .diffuse = glm::vec3(0.5),
+                    .diffuse_map = Sampler2D(Texture2D::single_pixel()),
+
+                    .specular = glm::vec3(0.5),
+                    .specular_map = Sampler2D(Texture2D::single_pixel()),
+
+                    .shininess = 10
+                }
+            );
+
+            obj->pos() = -model->bounding_box().center();
+
+            return obj;
+        })());
+        world.point_lights().push_back(std::make_unique<PointLight>(PointLight {
+            .pos = glm::vec3(2),
+
+            .ambient = glm::vec3(0.1, 0, 0),
+            .diffuse = glm::vec3(0.5, 0, 0),
+            .specular = glm::vec3(0.8, 0, 0),
+
+            .a0 = 1,
+            .a1 = 0,
+            .a2 = 0.1
+        }));
 
         window.set_mouse_button_callback([&](int button, int action, int mods) {
         });
@@ -60,7 +101,13 @@ namespace hw3 {
         });
         window.set_resize_callback([&](glm::ivec2 size) {
             window_size = glm::vec2(size);
-            inverse_window_size = glm::vec2(1.0) / window_size;
+
+            world.camera().projection_matrix(glm::perspective(
+                default_fov,
+                window_size.x / window_size.y,
+                0.1f,
+                100.0f
+            ));
         });
         window.set_scroll_callback([&](glm::dvec2 offset) {
         });
@@ -73,27 +120,23 @@ namespace hw3 {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         float angle = 0.0;
-        float distance = calculate_camera_distance(m.bounding_box(), default_fov);
+        float distance = calculate_camera_distance(model->bounding_box(), default_fov);
 
         distance *= std::sqrt(2);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
 
         window.do_main_loop([&](double delta_t) {
             angle += (tau / 10) * delta_t;
 
-            auto projMatrix = glm::perspective(
-                default_fov,
-                window_size.x / window_size.y,
-                0.1f,
-                100.0f
-            );
-            auto viewMatrix = glm::lookAt(
-                m.bounding_box().center() + glm::vec3(std::sin(angle) * distance, distance, std::cos(angle) * distance),
-                m.bounding_box().center(),
-                glm::vec3(0, 1, 0)
-            );
+            world.camera()
+                .pos(glm::vec3(std::sin(angle) * distance, distance, std::cos(angle) * distance))
+                .look_at(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
-            glClear(GL_COLOR_BUFFER_BIT);
-            m.draw(projMatrix * viewMatrix);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            world.draw();
         });
 
         return 0;

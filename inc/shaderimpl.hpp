@@ -12,13 +12,17 @@ namespace hw3 {
              */
             extern const char* vertex_simple;
             extern const char* vertex_textured;
+            extern const char* vertex_textured_normal;
             extern const char* fragment_fixed;
             extern const char* fragment_font;
+            extern const char* fragment_normal;
             extern const char* fragment_textured;
+
         }
 
         extern ShaderProgram fixed_program;
         extern ShaderProgram font_program;
+        extern ShaderProgram normal_program;
         extern ShaderProgram textured_program;
 
         void init();

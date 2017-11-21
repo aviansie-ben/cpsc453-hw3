@@ -36,8 +36,10 @@ FILE(GLOB_RECURSE CXX_SOURCES src/*.cpp)
 
 GLSL_GENERATE_CXX(vertex_simple.glsl "hw3::shaders::impl::vertex_simple")
 GLSL_GENERATE_CXX(vertex_textured.glsl "hw3::shaders::impl::vertex_textured")
+GLSL_GENERATE_CXX(vertex_textured_normal.glsl "hw3::shaders::impl::vertex_textured_normal")
 GLSL_GENERATE_CXX(fragment_font.glsl "hw3::shaders::impl::fragment_font")
 GLSL_GENERATE_CXX(fragment_fixed.glsl "hw3::shaders::impl::fragment_fixed")
+GLSL_GENERATE_CXX(fragment_normal.glsl "hw3::shaders::impl::fragment_normal")
 GLSL_GENERATE_CXX(fragment_textured.glsl "hw3::shaders::impl::fragment_textured")
 
 ADD_EXECUTABLE(hw3 ${CXX_SOURCES} ${GLSL_OUTPUTS})
