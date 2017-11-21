@@ -42,8 +42,20 @@ namespace hw3 {
         program.set_uniform(name + ".a2", value.a2);
     }
 
+    ShaderProgram& World::select_program() const {
+        switch (this->m_render_mode) {
+        case RenderMode::STANDARD:
+        case RenderMode::FULL_BRIGHT:
+            return shaders::phong_program;
+        case RenderMode::NORMALS:
+            return shaders::normal_program;
+        default:
+            throw std::runtime_error("Invalid render mode");
+        }
+    }
+
     void World::draw() const {
-        ShaderProgram& program = shaders::phong_program;
+        auto& program = this->select_program();
         auto view_projection_matrix = this->camera().view_projection_matrix();
 
         program.set_uniform("camera_position", this->camera().pos());
@@ -52,7 +64,7 @@ namespace hw3 {
             throw std::runtime_error("Too many point lights");
         }
 
-        if (this->m_lighting_enabled) {
+        if (this->m_render_mode == RenderMode::STANDARD) {
             program.set_uniform("scene_ambient", glm::vec3(0));
             program.set_uniform("num_point_lights", static_cast<int>(this->m_point_lights.size()));
             for (size_t i = 0; i < this->m_point_lights.size(); i++) {

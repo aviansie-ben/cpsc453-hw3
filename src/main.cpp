@@ -113,13 +113,23 @@ namespace hw3 {
         });
 
         window.set_key_callback([&](int key, int action, int mods) {
-            if (key == GLFW_KEY_L && action == GLFW_PRESS) {
-                world.lighting_enabled(!world.lighting_enabled());
+            if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+                switch (world.render_mode()) {
+                case RenderMode::STANDARD:
+                    world.render_mode(RenderMode::FULL_BRIGHT);
+                    std::cout << "Render Mode: FULL_BRIGHT" << std::endl;
 
-                if (world.lighting_enabled()) {
-                    std::cout << "Lighting enabled" << std::endl;
-                } else {
-                    std::cout << "Lighting disabled" << std::endl;
+                    break;
+                case RenderMode::FULL_BRIGHT:
+                    world.render_mode(RenderMode::NORMALS);
+                    std::cout << "Render Mode: NORMALS" << std::endl;
+
+                    break;
+                case RenderMode::NORMALS:
+                    world.render_mode(RenderMode::STANDARD);
+                    std::cout << "Render Mode: STANDARD" << std::endl;
+
+                    break;
                 }
             }
         });

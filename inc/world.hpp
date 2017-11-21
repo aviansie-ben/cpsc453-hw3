@@ -106,15 +106,23 @@ namespace hw3 {
         }
     };
 
+    enum class RenderMode {
+        STANDARD,
+        FULL_BRIGHT,
+        NORMALS
+    };
+
     class World {
         std::vector<std::unique_ptr<Object>> m_objects;
         std::vector<std::unique_ptr<PointLight>> m_point_lights;
 
-        bool m_lighting_enabled;
+        RenderMode m_render_mode = RenderMode::STANDARD;
 
         Camera m_camera;
+
+        ShaderProgram& select_program() const;
     public:
-        World() : m_lighting_enabled(true) {};
+        World() {};
 
         std::vector<std::unique_ptr<Object>>& objects() { return this->m_objects; }
         const std::vector<std::unique_ptr<Object>>& objects() const { return this->m_objects; }
@@ -124,9 +132,9 @@ namespace hw3 {
             return this->m_point_lights;
         }
 
-        bool lighting_enabled() const { return this->m_lighting_enabled; }
-        World& lighting_enabled(bool lighting_enabled) {
-            this->m_lighting_enabled = lighting_enabled;
+        RenderMode render_mode() const { return this->m_render_mode; }
+        World& render_mode(RenderMode render_mode) {
+            this->m_render_mode = render_mode;
             return *this;
         }
 
