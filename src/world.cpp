@@ -13,7 +13,11 @@ namespace hw3 {
         return this->m_orientation.apply(glm::translate(glm::mat4(1), this->m_pos));
     }
 
-    void Object::draw(ShaderProgram& program, const glm::mat4& view_projection_matrix) const {
+    void Object::draw(
+        ShaderProgram& program,
+        const RenderSettings& render_settings,
+        const glm::mat4& view_projection_matrix
+    ) const {
         auto model_matrix = this->transform_matrix();
 
         program.set_uniform("vertex_transform", view_projection_matrix * model_matrix);
@@ -24,6 +28,13 @@ namespace hw3 {
         program.use();
 
         this->m_model->draw();
+
+        if (render_settings.draw_bounding_boxes) {
+            this->m_model->bounding_box().draw(
+                view_projection_matrix * model_matrix,
+                glm::vec4(1, 0, 0, 1)
+            );
+        }
     }
 
     void ShaderProgram::uniform_setter<PointLight>::operator ()(
@@ -43,7 +54,7 @@ namespace hw3 {
     }
 
     ShaderProgram& World::select_program() const {
-        switch (this->m_render_mode) {
+        switch (this->m_render_settings.mode) {
         case RenderMode::STANDARD:
         case RenderMode::FULL_BRIGHT:
             return shaders::phong_program;
@@ -64,7 +75,7 @@ namespace hw3 {
             throw std::runtime_error("Too many point lights");
         }
 
-        if (this->m_render_mode == RenderMode::STANDARD) {
+        if (this->m_render_settings.mode == RenderMode::STANDARD) {
             program.set_uniform("scene_ambient", glm::vec3(0));
             program.set_uniform("num_point_lights", static_cast<int>(this->m_point_lights.size()));
             for (size_t i = 0; i < this->m_point_lights.size(); i++) {
@@ -82,7 +93,7 @@ namespace hw3 {
         }
 
         for (const auto& obj : this->m_objects) {
-            obj->draw(program, view_projection_matrix);
+            obj->draw(program, this->m_render_settings, view_projection_matrix);
         }
     }
 }

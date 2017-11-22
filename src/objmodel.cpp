@@ -5,11 +5,68 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "objmodel.hpp"
 #include "shaderimpl.hpp"
 
 namespace hw3 {
+    static GlVertexArray box_va;
+
+    const GlVertexArray& AABB::box_geometry() {
+        if (!box_va) {
+            box_va = GlVertexArray(2, 8);
+
+            box_va.buffer(0).load_data<glm::vec3>({
+                glm::vec3(0, 0, 0),
+                glm::vec3(0, 0, 1),
+                glm::vec3(0, 1, 0),
+                glm::vec3(0, 1, 1),
+                glm::vec3(1, 0, 0),
+                glm::vec3(1, 0, 1),
+                glm::vec3(1, 1, 0),
+                glm::vec3(1, 1, 1)
+            }, GL_STATIC_DRAW);
+
+            box_va.buffer(1).load_data<unsigned int>({
+                0, 1,
+                1, 3,
+                3, 2,
+                2, 0,
+                4, 5,
+                5, 7,
+                7, 6,
+                6, 4,
+                0, 4,
+                1, 5,
+                2, 6,
+                3, 7
+            }, GL_STATIC_DRAW);
+
+            box_va.bind_attribute(0, 3, DataType::FLOAT, 0, 0, 0);
+        }
+
+        return box_va;
+    }
+
+    void AABB::draw(const glm::mat4& transform, glm::vec4 colour) const {
+        shaders::fixed_program.set_uniform(
+            "vertex_transform",
+            transform * glm::scale(glm::translate(glm::mat4(1), this->m_min), this->size())
+        );
+        shaders::fixed_program.set_uniform("fixed_color", colour);
+        shaders::fixed_program.use();
+
+        const auto& geometry = AABB::box_geometry();
+
+        geometry.draw_indexed(
+            geometry.buffer(1),
+            0,
+            geometry.buffer(1).size() / sizeof(unsigned int),
+            PrimitiveType::LINES
+        );
+    }
+
     void ShaderProgram::uniform_setter<Material>::operator ()(
         ShaderProgram& program, std::string name, const Material& value
     ) {

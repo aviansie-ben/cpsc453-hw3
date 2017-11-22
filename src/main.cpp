@@ -114,22 +114,30 @@ namespace hw3 {
 
         window.set_key_callback([&](int key, int action, int mods) {
             if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-                switch (world.render_mode()) {
+                switch (world.render_settings().mode) {
                 case RenderMode::STANDARD:
-                    world.render_mode(RenderMode::FULL_BRIGHT);
+                    world.render_settings().mode = RenderMode::FULL_BRIGHT;
                     std::cout << "Render Mode: FULL_BRIGHT" << std::endl;
 
                     break;
                 case RenderMode::FULL_BRIGHT:
-                    world.render_mode(RenderMode::NORMALS);
+                    world.render_settings().mode = RenderMode::NORMALS;
                     std::cout << "Render Mode: NORMALS" << std::endl;
 
                     break;
                 case RenderMode::NORMALS:
-                    world.render_mode(RenderMode::STANDARD);
+                    world.render_settings().mode = RenderMode::STANDARD;
                     std::cout << "Render Mode: STANDARD" << std::endl;
 
                     break;
+                }
+            } else if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+                world.render_settings().draw_bounding_boxes = !world.render_settings().draw_bounding_boxes;
+
+                if (world.render_settings().draw_bounding_boxes) {
+                    std::cout << "Bounding boxes ENABLED" << std::endl;
+                } else {
+                    std::cout << "Bounding boxes DISABLED" << std::endl;
                 }
             }
         });

@@ -22,6 +22,17 @@ namespace hw3 {
         glm::mat4 apply(const glm::mat4& transform) const;
     };
 
+    enum class RenderMode {
+        STANDARD,
+        FULL_BRIGHT,
+        NORMALS
+    };
+
+    struct RenderSettings {
+        RenderMode mode = RenderMode::STANDARD;
+        bool draw_bounding_boxes = false;
+    };
+
     class Object {
         std::shared_ptr<Model3D> m_model;
         Material m_material;
@@ -45,6 +56,7 @@ namespace hw3 {
 
         void draw(
             ShaderProgram& program,
+            const RenderSettings& render_settings,
             const glm::mat4& view_projection_matrix
         ) const;
     };
@@ -106,17 +118,11 @@ namespace hw3 {
         }
     };
 
-    enum class RenderMode {
-        STANDARD,
-        FULL_BRIGHT,
-        NORMALS
-    };
-
     class World {
         std::vector<std::unique_ptr<Object>> m_objects;
         std::vector<std::unique_ptr<PointLight>> m_point_lights;
 
-        RenderMode m_render_mode = RenderMode::STANDARD;
+        RenderSettings m_render_settings;
 
         Camera m_camera;
 
@@ -132,11 +138,8 @@ namespace hw3 {
             return this->m_point_lights;
         }
 
-        RenderMode render_mode() const { return this->m_render_mode; }
-        World& render_mode(RenderMode render_mode) {
-            this->m_render_mode = render_mode;
-            return *this;
-        }
+        RenderSettings& render_settings() { return this->m_render_settings; }
+        const RenderSettings& render_settings() const { return this->m_render_settings; }
 
         Camera& camera() { return this->m_camera; }
         const Camera& camera() const { return this->m_camera; }

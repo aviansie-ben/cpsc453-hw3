@@ -15,6 +15,8 @@ namespace hw3 {
     class AABB {
         glm::vec3 m_min;
         glm::vec3 m_max;
+
+        static const GlVertexArray& box_geometry();
     public:
         AABB() {}
         AABB(glm::vec3 min, glm::vec3 max) : m_min(min), m_max(max) {}
@@ -24,6 +26,8 @@ namespace hw3 {
 
         glm::vec3 size() const { return this->m_max - this->m_min; }
         glm::vec3 center() const { return (this->m_min + this->m_max) / 2.0f; }
+
+        void draw(const glm::mat4& transform, glm::vec4 colour) const;
     };
 
     struct Material {

@@ -16,6 +16,7 @@ namespace hw3 {
 
     enum class PrimitiveType {
         POINTS = GL_POINTS,
+        LINES = GL_LINES,
         LINE_STRIP = GL_LINE_STRIP,
         LINE_STRIP_ADJACENCY = GL_LINE_STRIP_ADJACENCY,
         LINE_LOOP = GL_LINE_LOOP,
