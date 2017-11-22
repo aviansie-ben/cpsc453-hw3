@@ -67,6 +67,20 @@ namespace hw3 {
         );
     }
 
+    Material Material::without_maps() const {
+        return Material {
+            .ambient = this->ambient,
+
+            .diffuse = this->diffuse,
+            .diffuse_map = Sampler2D(Texture2D::single_pixel()),
+
+            .specular = this->specular,
+            .specular_map = Sampler2D(Texture2D::single_pixel()),
+
+            .shininess = this->shininess
+        };
+    }
+
     void ShaderProgram::uniform_setter<Material>::operator ()(
         ShaderProgram& program, std::string name, const Material& value
     ) {
@@ -244,7 +258,9 @@ namespace hw3 {
                 throw std::runtime_error("Wrong number of arguments for \"vt\"");
             }
 
-            this->m_tex.push_back(parse_vec2(parts, 1));
+            auto v = parse_vec2(parts, 1);
+
+            this->m_tex.push_back(glm::vec2(v.x, 1 - v.y));
         } else if (parts[0] == "vn") {
             if (parts.size() != 4) {
                 throw std::runtime_error("Wrong number of arguments for \"vn\"");

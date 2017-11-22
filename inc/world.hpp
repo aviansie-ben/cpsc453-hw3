@@ -30,6 +30,7 @@ namespace hw3 {
 
     struct RenderSettings {
         RenderMode mode = RenderMode::STANDARD;
+        bool draw_textures = true;
         bool draw_bounding_boxes = false;
     };
 
@@ -46,8 +47,11 @@ namespace hw3 {
             : m_model(std::move(model)), m_material(std::move(material)) {}
 
         const std::shared_ptr<Model3D>& model() const { return this->m_model; }
-        Material& material() { return this->m_material; }
         const Material& material() const { return this->m_material; }
+        Object& material(Material material) {
+            this->m_material = std::move(material);
+            return *this;
+        }
 
         glm::vec3& pos() { return this->m_pos; }
         const glm::vec3& pos() const { return this->m_pos; }

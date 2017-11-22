@@ -40,6 +40,8 @@ namespace hw3 {
         Sampler2D specular_map;
 
         float shininess;
+
+        Material without_maps() const;
     };
 
     template <>

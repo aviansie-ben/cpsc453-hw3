@@ -28,8 +28,8 @@ namespace hw3 {
     }
 
     extern "C" int main(int argc, char** argv) {
-        if (argc != 2) {
-            std::cerr << "Usage: " << argv[0] << " [object file]" << std::endl;
+        if (argc != 2 && argc != 3) {
+            std::cerr << "Usage: " << argv[0] << " <object file> [texture]" << std::endl;
             return 1;
         }
 
@@ -64,13 +64,21 @@ namespace hw3 {
         ));
 
         world.objects().emplace_back(([&]() {
+            auto tex = argc == 3
+                ? std::make_shared<Texture2D>(Texture2D::load_from_file(argv[2]))
+                : Texture2D::single_pixel();
+            tex->generate_mipmap();
+
             auto obj = std::make_unique<Object>(
                 model,
                 Material {
                     .ambient = glm::vec3(0.5),
 
                     .diffuse = glm::vec3(0.5),
-                    .diffuse_map = Sampler2D(Texture2D::single_pixel()),
+                    .diffuse_map = std::move(
+                        Sampler2D(tex)
+                            .set_sample_mode(TextureSampleMode::LINEAR, TextureSampleMode::LINEAR_MIPMAP_LINEAR)
+                    ),
 
                     .specular = glm::vec3(0.5),
                     .specular_map = Sampler2D(Texture2D::single_pixel()),
@@ -138,6 +146,14 @@ namespace hw3 {
                     std::cout << "Bounding boxes ENABLED" << std::endl;
                 } else {
                     std::cout << "Bounding boxes DISABLED" << std::endl;
+                }
+            } else if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+                world.render_settings().draw_textures = !world.render_settings().draw_textures;
+
+                if (world.render_settings().draw_textures) {
+                    std::cout << "Texture mapping ENABLED" << std::endl;
+                } else {
+                    std::cout << "Texture mapping DISABLED" << std::endl;
                 }
             }
         });

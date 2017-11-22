@@ -24,7 +24,12 @@ namespace hw3 {
         program.set_uniform("vertex_world_transform", model_matrix);
         program.set_uniform("normal_transform", glm::transpose(glm::inverse(glm::mat3(model_matrix))));
 
-        program.set_uniform("material", this->m_material);
+        if (render_settings.draw_textures) {
+            program.set_uniform("material", this->m_material);
+        } else {
+            program.set_uniform("material", this->m_material.without_maps());
+        }
+
         program.use();
 
         this->m_model->draw();
