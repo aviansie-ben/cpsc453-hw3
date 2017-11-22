@@ -20,6 +20,7 @@ namespace hw3 {
     constexpr float default_fov = tau / 6;
 
     static float calculate_camera_distance(const AABB& bounding_box, float fov) {
+        // TODO: This doesn't take into account that the AABB is not at the origin.
         // Start by turning the bounding box into a bounding sphere.
         float bound_radius = glm::distance(bounding_box.min(), bounding_box.center());
 
@@ -86,8 +87,6 @@ namespace hw3 {
                     .shininess = 10
                 }
             );
-
-            obj->pos() = -model->bounding_box().center();
 
             return obj;
         })());
