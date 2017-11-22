@@ -76,6 +76,7 @@ namespace hw3 {
         void set_uniform(std::string name, glm::vec4 value);
         void set_uniform(std::string name, const glm::mat3& value);
         void set_uniform(std::string name, const glm::mat4& value);
+        void set_uniform(std::string name, Sampler2D* value) { this->set_uniform(name, static_cast<const Sampler2D*>(value)); }
         void set_uniform(std::string name, const Sampler2D* value);
 
         template <typename T>

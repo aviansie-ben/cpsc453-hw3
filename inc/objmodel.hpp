@@ -32,6 +32,7 @@ namespace hw3 {
 
     struct Material {
         glm::vec3 ambient;
+        Sampler2D ambient_occlusion_map;
 
         glm::vec3 diffuse;
         Sampler2D diffuse_map;

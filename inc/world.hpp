@@ -30,6 +30,7 @@ namespace hw3 {
 
     struct RenderSettings {
         RenderMode mode = RenderMode::STANDARD;
+        bool use_ambient_occlusion = true;
         bool draw_textures = true;
         bool draw_bounding_boxes = false;
     };

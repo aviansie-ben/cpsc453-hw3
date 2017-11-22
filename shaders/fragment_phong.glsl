@@ -21,6 +21,7 @@ struct PointLight {
 
 struct Material {
     vec3 ambient;
+    sampler2D ambient_occlusion_map;
 
     vec3 diffuse;
     sampler2D diffuse_map;
@@ -52,6 +53,7 @@ vec3 calc_point_light(PointLight light, vec3 view_dir, vec3 normal) {
     // Calculate ambient light
     vec3 ambient = light.ambient
         * vec3(texture(material.diffuse_map, tex_coord))
+        * vec3(texture(material.ambient_occlusion_map, tex_coord).r)
         * material.ambient;
 
     // Calculate diffuse light
@@ -73,6 +75,7 @@ vec3 calc_point_light(PointLight light, vec3 view_dir, vec3 normal) {
 vec3 calc_scene_ambient() {
     return scene_ambient
         * vec3(texture(material.diffuse_map, tex_coord))
+        * vec3(texture(material.ambient_occlusion_map, tex_coord).r)
         * material.ambient;
 }
 

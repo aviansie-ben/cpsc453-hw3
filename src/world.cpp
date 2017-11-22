@@ -26,6 +26,12 @@ namespace hw3 {
 
         if (render_settings.draw_textures) {
             program.set_uniform("material", this->m_material);
+
+            if (!render_settings.use_ambient_occlusion) {
+                Sampler2D blank(Texture2D::single_pixel());
+
+                program.set_uniform("material.ambient_occlusion_map", &blank);
+            }
         } else {
             program.set_uniform("material", this->m_material.without_maps());
         }

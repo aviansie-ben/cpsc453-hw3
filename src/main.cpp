@@ -29,8 +29,8 @@ namespace hw3 {
     }
 
     extern "C" int main(int argc, char** argv) {
-        if (argc != 2 && argc != 3) {
-            std::cerr << "Usage: " << argv[0] << " <object file> [texture]" << std::endl;
+        if (argc < 2 || argc > 4) {
+            std::cerr << "Usage: " << argv[0] << " <object file> [texture] [ambient map]" << std::endl;
             return 1;
         }
 
@@ -64,19 +64,28 @@ namespace hw3 {
         ));
 
         world.objects().emplace_back(([&]() {
-            auto tex = argc == 3
+            auto diffuse_tex = argc >= 3
                 ? std::make_shared<Texture2D>(Texture2D::load_from_file(argv[2]))
                 : Texture2D::single_pixel();
-            tex->generate_mipmap();
+            diffuse_tex->generate_mipmap();
+
+            auto ao_tex = argc >= 4
+                ? std::make_shared<Texture2D>(Texture2D::load_from_file(argv[3]))
+                : Texture2D::single_pixel();
+            ao_tex->generate_mipmap();
 
             auto obj = std::make_unique<Object>(
                 model,
                 Material {
                     .ambient = glm::vec3(0.5),
+                    .ambient_occlusion_map = std::move(
+                        Sampler2D(ao_tex)
+                            .set_sample_mode(TextureSampleMode::LINEAR, TextureSampleMode::LINEAR_MIPMAP_LINEAR)
+                    ),
 
                     .diffuse = glm::vec3(0.5),
                     .diffuse_map = std::move(
-                        Sampler2D(tex)
+                        Sampler2D(diffuse_tex)
                             .set_sample_mode(TextureSampleMode::LINEAR, TextureSampleMode::LINEAR_MIPMAP_LINEAR)
                     ),
 
@@ -152,6 +161,14 @@ namespace hw3 {
                     std::cout << "Texture mapping ENABLED" << std::endl;
                 } else {
                     std::cout << "Texture mapping DISABLED" << std::endl;
+                }
+            } else if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+                world.render_settings().use_ambient_occlusion = !world.render_settings().use_ambient_occlusion;
+
+                if (world.render_settings().use_ambient_occlusion) {
+                    std::cout << "Ambient occlusion ENABLED" << std::endl;
+                } else {
+                    std::cout << "Ambient occlusion DISABLED" << std::endl;
                 }
             }
         });

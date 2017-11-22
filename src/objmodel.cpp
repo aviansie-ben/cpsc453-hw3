@@ -70,6 +70,7 @@ namespace hw3 {
     Material Material::without_maps() const {
         return Material {
             .ambient = this->ambient,
+            .ambient_occlusion_map = Sampler2D(Texture2D::single_pixel()),
 
             .diffuse = this->diffuse,
             .diffuse_map = Sampler2D(Texture2D::single_pixel()),
@@ -85,6 +86,7 @@ namespace hw3 {
         ShaderProgram& program, std::string name, const Material& value
     ) {
         program.set_uniform(name + ".ambient", value.ambient);
+        program.set_uniform(name + ".ambient_occlusion_map", &value.ambient_occlusion_map);
 
         program.set_uniform(name + ".diffuse", value.diffuse);
         program.set_uniform(name + ".diffuse_map", &value.diffuse_map);
