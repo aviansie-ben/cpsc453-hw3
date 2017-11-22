@@ -57,11 +57,10 @@ namespace hw3 {
 
         glm::vec2 window_size = glm::vec2(window.size());
 
-        world.camera().projection_matrix(glm::perspective(
+        world.camera().projection_matrix(glm::infinitePerspective(
             default_fov,
             window_size.x / window_size.y,
-            0.1f,
-            100.0f
+            0.1f
         ));
 
         world.objects().emplace_back(([&]() {
