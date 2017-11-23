@@ -64,6 +64,93 @@ namespace hw3 {
         program.set_uniform(name + ".a2", value.a2);
     }
 
+    void OrbitControls::begin_rotate(glm::vec2 pos) {
+        if (this->m_state == OrbitState::NONE) {
+            this->m_state = OrbitState::ROTATING;
+            this->m_last_pos = pos;
+        }
+    }
+
+    void OrbitControls::begin_pan(glm::vec2 pos) {
+        if (this->m_state == OrbitState::NONE) {
+            this->m_state = OrbitState::PANNING;
+            this->m_last_pos = pos;
+        }
+    }
+
+    static glm::vec3 calculate_posball(glm::vec2 pos) {
+        float dist_sq = pos.x * pos.x + pos.y * pos.y;
+
+        if (dist_sq <= 1) {
+            return glm::vec3(pos, std::sqrt(1 - dist_sq));
+        } else {
+            return glm::vec3(glm::normalize(pos), 0);
+        }
+    }
+
+    void OrbitControls::move_cursor(glm::vec2 pos) {
+        switch (this->m_state) {
+        case OrbitState::ROTATING: {
+            auto camera_orientation = this->m_camera->orientation_matrix();
+            auto camera_pos = this->m_camera->pos();
+
+            auto last_posball = calculate_posball(this->m_last_pos);
+            auto posball = calculate_posball(pos);
+
+            float angle = std::acos(std::min(1.0f, glm::dot(last_posball, posball)));
+            auto axis = glm::inverse(camera_orientation)
+                * glm::cross(last_posball, posball);
+
+            auto rotate_matrix = glm::mat3(glm::rotate(
+                glm::mat4(1),
+                angle,
+                axis
+            ));
+
+            camera_orientation = camera_orientation * rotate_matrix;
+            camera_pos = this->m_rotate_origin
+                + glm::transpose(rotate_matrix) * (camera_pos - this->m_rotate_origin);
+
+            this->m_camera->orientation_matrix(camera_orientation);
+            this->m_camera->pos(camera_pos);
+
+            break;
+        }
+        case OrbitState::PANNING: {
+            auto delta3 = glm::inverse(this->m_camera->orientation_matrix())
+                * glm::vec3(this->m_last_pos - pos, 0)
+                * glm::distance(this->m_camera->pos(), this->m_rotate_origin);
+
+            this->m_camera->pos(this->m_camera->pos() + delta3);
+            this->m_rotate_origin += delta3;
+
+            break;
+        }
+        case OrbitState::NONE:
+            break; // Do nothing
+        }
+
+        this->m_last_pos = pos;
+    }
+
+    void OrbitControls::handle_zoom(float delta) {
+        glm::vec3 camera_look = this->m_camera->pos() - this->m_rotate_origin;
+
+        this->m_camera->pos(this->m_rotate_origin + camera_look * std::pow(2.0f, delta * -0.25f));
+    }
+
+    void OrbitControls::end_rotate() {
+        if (this->m_state == OrbitState::ROTATING) {
+            this->m_state = OrbitState::NONE;
+        }
+    }
+
+    void OrbitControls::end_pan() {
+        if (this->m_state == OrbitState::PANNING) {
+            this->m_state = OrbitState::NONE;
+        }
+    }
+
     ShaderProgram& World::select_program() const {
         switch (this->m_render_settings.mode) {
         case RenderMode::STANDARD:

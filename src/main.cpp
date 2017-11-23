@@ -28,6 +28,12 @@ namespace hw3 {
         return bound_radius / std::tan(fov / 2);
     }
 
+    glm::vec2 get_gl_coord(glm::dvec2 screen_coord, const Window& window) {
+        glm::vec2 win_size = glm::vec2(window.size());
+
+        return glm::vec2(screen_coord.x, win_size.y - screen_coord.y) / win_size * 2.0f - glm::vec2(1, 1);
+    }
+
     extern "C" int main(int argc, char** argv) {
         if (argc < 2 || argc > 4) {
             std::cerr << "Usage: " << argv[0] << " <object file> [texture] [ambient map]" << std::endl;
@@ -54,6 +60,7 @@ namespace hw3 {
         std::cout << "Loaded " << model->num_vertices() << " vertices from " << argv[1] << std::endl;
 
         World world;
+        OrbitControls orbit(&world.camera());
 
         glm::vec2 window_size = glm::vec2(window.size());
 
@@ -101,9 +108,9 @@ namespace hw3 {
         world.point_lights().push_back(std::make_unique<PointLight>(PointLight {
             .pos = glm::vec3(2),
 
-            .ambient = glm::vec3(0.1, 0, 0),
-            .diffuse = glm::vec3(0.5, 0, 0),
-            .specular = glm::vec3(0.8, 0, 0),
+            .ambient = glm::vec3(0.3),
+            .diffuse = glm::vec3(1),
+            .specular = glm::vec3(0.8),
 
             .a0 = 1,
             .a1 = 0,
@@ -111,8 +118,22 @@ namespace hw3 {
         }));
 
         window.set_mouse_button_callback([&](int button, int action, int mods) {
+            if (button == GLFW_MOUSE_BUTTON_LEFT) {
+                if (action == GLFW_PRESS) {
+                    orbit.begin_rotate(get_gl_coord(window.cursor_pos(), window));
+                } else if (action == GLFW_RELEASE) {
+                    orbit.end_rotate();
+                }
+            } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+                if (action == GLFW_PRESS) {
+                    orbit.begin_pan(get_gl_coord(window.cursor_pos(), window));
+                } else {
+                    orbit.end_pan();
+                }
+            }
         });
         window.set_cursor_move_callback([&](glm::dvec2 dpos) {
+            orbit.move_cursor(get_gl_coord(dpos, window));
         });
         window.set_resize_callback([&](glm::ivec2 size) {
             window_size = glm::vec2(size);
@@ -125,6 +146,7 @@ namespace hw3 {
             ));
         });
         window.set_scroll_callback([&](glm::dvec2 offset) {
+            orbit.handle_zoom(offset.y);
         });
 
         window.set_key_callback([&](int key, int action, int mods) {
@@ -177,7 +199,6 @@ namespace hw3 {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        float angle = 0.0;
         float distance = calculate_camera_distance(model->bounding_box(), default_fov);
 
         distance *= std::sqrt(2);
@@ -185,13 +206,12 @@ namespace hw3 {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
 
+        world.camera()
+            .pos(glm::vec3(distance, distance, 0))
+            .look_at(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        orbit.rotate_origin(glm::vec3(0, 0, 0));
+
         window.do_main_loop([&](double delta_t) {
-            angle += (tau / 10) * delta_t;
-
-            world.camera()
-                .pos(glm::vec3(std::sin(angle) * distance, distance, std::cos(angle) * distance))
-                .look_at(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             world.draw();

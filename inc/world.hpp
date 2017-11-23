@@ -104,9 +104,9 @@ namespace hw3 {
 
         glm::mat3 orientation_matrix() const { return glm::mat3(this->m_view_matrix); }
         Camera& orientation_matrix(const glm::mat3& orientation_matrix) {
-            this->m_view_matrix[0] = glm::vec4(orientation_matrix[0], this->m_view_matrix[0].z);
-            this->m_view_matrix[1] = glm::vec4(orientation_matrix[1], this->m_view_matrix[1].z);
-            this->m_view_matrix[2] = glm::vec4(orientation_matrix[2], this->m_view_matrix[2].z);
+            this->m_view_matrix[0] = glm::vec4(orientation_matrix[0], this->m_view_matrix[0].w);
+            this->m_view_matrix[1] = glm::vec4(orientation_matrix[1], this->m_view_matrix[1].w);
+            this->m_view_matrix[2] = glm::vec4(orientation_matrix[2], this->m_view_matrix[2].w);
 
             return *this;
         }
@@ -116,11 +116,44 @@ namespace hw3 {
             return *this;
         }
 
-        glm::vec3 pos() const { return -glm::vec3(this->m_view_matrix[3]); }
+        glm::vec3 pos() const { return glm::vec3(glm::inverse(this->m_view_matrix)[3]); }
         Camera& pos(glm::vec3 pos) {
-            this->m_view_matrix[3] = glm::vec4(-pos, this->m_view_matrix[3].z);
+            pos = this->orientation_matrix() * -pos;
+            this->m_view_matrix[3] = glm::vec4(pos, this->m_view_matrix[3].w);
             return *this;
         }
+    };
+
+    class OrbitControls {
+        enum class OrbitState {
+            NONE,
+            ROTATING,
+            PANNING
+        };
+
+        Camera* m_camera = nullptr;
+        glm::vec3 m_rotate_origin;
+
+        glm::vec2 m_last_pos;
+        OrbitState m_state = OrbitState::NONE;
+    public:
+        OrbitControls() {}
+        OrbitControls(Camera* camera) : m_camera(camera) {}
+
+        glm::vec3 rotate_origin() const { return this->m_rotate_origin; }
+        OrbitControls& rotate_origin(glm::vec3 rotate_origin) {
+            this->m_rotate_origin = rotate_origin;
+            return *this;
+        }
+
+        void begin_rotate(glm::vec2 pos);
+        void begin_pan(glm::vec2 pos);
+
+        void move_cursor(glm::vec2 pos);
+        void handle_zoom(float delta);
+
+        void end_rotate();
+        void end_pan();
     };
 
     class World {
