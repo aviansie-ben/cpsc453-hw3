@@ -67,6 +67,14 @@ namespace hw3 {
         );
     }
 
+    AABB operator*(float scale, const AABB& aabb) {
+        if (scale >= 0) {
+            return AABB(aabb.min() * scale, aabb.max() * scale);
+        } else {
+            return AABB(aabb.max() * scale, aabb.min() * scale);
+        }
+    }
+
     Material Material::without_maps() const {
         return Material {
             .ambient = this->ambient,

@@ -25,7 +25,7 @@ namespace hw3 {
         float bound_radius = glm::distance(bounding_box.min(), bounding_box.center());
 
         // Now calculate the distance the camera must be to show the entire bounding sphere.
-        return bound_radius / std::tan(fov / 2);
+        return bound_radius * 2 / std::tan(fov / 2);
     }
 
     glm::vec2 get_gl_coord(glm::dvec2 screen_coord, const Window& window) {
@@ -117,9 +117,7 @@ namespace hw3 {
             .a2 = 0.1
         }));
 
-        float distance = calculate_camera_distance(model->bounding_box(), default_fov);
-
-        distance *= std::sqrt(2);
+        float edit_speed = 1.0f;
 
         window.set_mouse_button_callback([&](int button, int action, int mods) {
             if (button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -142,11 +140,10 @@ namespace hw3 {
         window.set_resize_callback([&](glm::ivec2 size) {
             window_size = glm::vec2(size);
 
-            world.camera().projection_matrix(glm::perspective(
+            world.camera().projection_matrix(glm::infinitePerspective(
                 default_fov,
                 window_size.x / window_size.y,
-                0.1f,
-                100.0f
+                0.1f
             ));
         });
         window.set_scroll_callback([&](glm::dvec2 offset) {
@@ -188,7 +185,7 @@ namespace hw3 {
                 } else {
                     std::cout << "Texture mapping DISABLED" << std::endl;
                 }
-            } else if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+            } else if (key == GLFW_KEY_O && action == GLFW_PRESS) {
                 world.render_settings().use_ambient_occlusion = !world.render_settings().use_ambient_occlusion;
 
                 if (world.render_settings().use_ambient_occlusion) {
@@ -197,10 +194,18 @@ namespace hw3 {
                     std::cout << "Ambient occlusion DISABLED" << std::endl;
                 }
             } else if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+                auto obj_aabb = world.objects()[0]->bounding_box();
+                auto obj_center = world.objects()[0]->pos() + obj_aabb.center();
+                float distance = calculate_camera_distance(model->bounding_box(), default_fov);
+
                 world.camera()
-                    .pos(glm::vec3(distance, distance, 0))
-                    .look_at(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-                orbit.rotate_origin(glm::vec3(0, 0, 0));
+                    .pos(obj_center + glm::vec3(0, 0, distance))
+                    .look_at(obj_center, glm::vec3(0, 1, 0));
+                orbit.rotate_origin(obj_center);
+            } else if (key == GLFW_KEY_I && action == GLFW_PRESS) {
+                edit_speed *= 1.1f;
+            } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
+                edit_speed /= 1.1f;
             }
         });
 
@@ -211,13 +216,56 @@ namespace hw3 {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
 
-        world.camera()
-            .pos(glm::vec3(distance, distance, 0))
-            .look_at(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-        orbit.rotate_origin(glm::vec3(0, 0, 0));
+        {
+            auto obj_aabb = world.objects()[0]->bounding_box();
+            auto obj_center = world.objects()[0]->pos() + obj_aabb.center();
+            float distance = calculate_camera_distance(obj_aabb, default_fov);
+
+            world.camera()
+                .pos(obj_center + glm::vec3(0, 0, distance))
+                .look_at(obj_center, glm::vec3(0, 1, 0));
+            orbit.rotate_origin(obj_center);
+        }
 
         window.do_main_loop([&](double delta_t) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            if (window.is_key_pressed(GLFW_KEY_LEFT_SHIFT) || window.is_key_pressed(GLFW_KEY_RIGHT_SHIFT)) {
+                if (window.is_key_pressed(GLFW_KEY_A))
+                    world.objects()[0]->orientation().yaw -= delta_t / 10 * tau * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_D))
+                    world.objects()[0]->orientation().yaw += delta_t / 10 * tau * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_W))
+                    world.objects()[0]->orientation().pitch -= delta_t / 10 * tau * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_S))
+                    world.objects()[0]->orientation().pitch += delta_t / 10 * tau * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_Q))
+                    world.objects()[0]->orientation().roll += delta_t / 10 * tau * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_E))
+                    world.objects()[0]->orientation().roll -= delta_t / 10 * tau * edit_speed;
+            } else {
+                if (window.is_key_pressed(GLFW_KEY_A))
+                    world.objects()[0]->pos().x -= delta_t * 1.5f * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_D))
+                    world.objects()[0]->pos().x += delta_t * 1.5f * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_W))
+                    world.objects()[0]->pos().z -= delta_t * 1.5f * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_S))
+                    world.objects()[0]->pos().z += delta_t * 1.5f * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_Q))
+                    world.objects()[0]->pos().y -= delta_t * 1.5f * edit_speed;
+                if (window.is_key_pressed(GLFW_KEY_E))
+                    world.objects()[0]->pos().y += delta_t * 1.5f * edit_speed;
+            }
+
+            if (window.is_key_pressed(GLFW_KEY_Z))
+                world.objects()[0]->scale(
+                    world.objects()[0]->scale() * std::pow(1.5f, delta_t * edit_speed)
+                );
+            if (window.is_key_pressed(GLFW_KEY_X))
+                world.objects()[0]->scale(
+                    world.objects()[0]->scale() / std::pow(1.5f, delta_t * edit_speed)
+                );
 
             world.draw();
         });

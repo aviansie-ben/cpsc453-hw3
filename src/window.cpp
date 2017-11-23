@@ -67,6 +67,10 @@ namespace hw3 {
         return cursor_pos;
     }
 
+    bool Window::is_key_pressed(int key) const {
+        return glfwGetKey(this->m_ptr, key) == GLFW_PRESS;
+    }
+
     void Window::set_vsync(bool enabled) {
         this->make_current_context();
         glfwSwapInterval(enabled ? 1 : 0);

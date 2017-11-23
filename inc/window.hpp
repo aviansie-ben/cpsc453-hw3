@@ -29,6 +29,8 @@ namespace hw3 {
         glm::ivec2 size() const;
         glm::dvec2 cursor_pos() const;
 
+        bool is_key_pressed(int key) const;
+
         void make_current_context() { glfwMakeContextCurrent(this->m_ptr); }
 
         void set_vsync(bool enabled);

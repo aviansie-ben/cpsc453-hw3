@@ -41,6 +41,7 @@ namespace hw3 {
 
         glm::vec3 m_pos;
         Orientation m_orientation;
+        float m_scale = 1.0f;
 
         glm::mat4 transform_matrix() const;
     public:
@@ -58,6 +59,13 @@ namespace hw3 {
         const glm::vec3& pos() const { return this->m_pos; }
         Orientation& orientation() { return this->m_orientation; }
         const Orientation& orientation() const { return this->m_orientation; }
+        float scale() const { return this->m_scale; }
+        Object& scale(float scale) {
+            this->m_scale = scale;
+            return *this;
+        }
+
+        AABB bounding_box() const;
 
         void draw(
             ShaderProgram& program,

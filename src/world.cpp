@@ -5,12 +5,25 @@
 
 namespace hw3 {
     glm::mat4 Orientation::apply(const glm::mat4& transform) const {
-        // TODO Implement this
-        return transform;
+        return glm::rotate(
+            glm::rotate(
+                glm::rotate(transform, this->yaw, glm::vec3(0, 1, 0)),
+                this->pitch,
+                glm::vec3(1, 0, 0)
+            ),
+            this->roll,
+            glm::vec3(0, 0, 1)
+        );
     }
 
     glm::mat4 Object::transform_matrix() const {
-        return this->m_orientation.apply(glm::translate(glm::mat4(1), this->m_pos));
+        return this->m_orientation.apply(
+            glm::scale(glm::translate(glm::mat4(1), this->m_pos), glm::vec3(this->m_scale))
+        );
+    }
+
+    AABB Object::bounding_box() const {
+        return this->m_model->bounding_box() * this->m_scale;
     }
 
     void Object::draw(

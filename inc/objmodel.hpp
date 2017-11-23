@@ -30,6 +30,9 @@ namespace hw3 {
         void draw(const glm::mat4& transform, glm::vec4 colour) const;
     };
 
+    AABB operator*(float scale, const AABB& aabb);
+    inline AABB operator*(const AABB& aabb, float scale) { return scale * aabb; }
+
     struct Material {
         glm::vec3 ambient;
         Sampler2D ambient_occlusion_map;
