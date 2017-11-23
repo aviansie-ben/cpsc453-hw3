@@ -85,19 +85,19 @@ namespace hw3 {
                 model,
                 Material {
                     .ambient = glm::vec3(0.5),
-                    .ambient_occlusion_map = std::move(
+                    .ambient_occlusion_map = std::make_shared<Sampler2D>(std::move(
                         Sampler2D(ao_tex)
                             .set_sample_mode(TextureSampleMode::LINEAR, TextureSampleMode::LINEAR_MIPMAP_LINEAR)
-                    ),
+                    )),
 
                     .diffuse = glm::vec3(0.5),
-                    .diffuse_map = std::move(
+                    .diffuse_map = std::make_shared<Sampler2D>(std::move(
                         Sampler2D(diffuse_tex)
                             .set_sample_mode(TextureSampleMode::LINEAR, TextureSampleMode::LINEAR_MIPMAP_LINEAR)
-                    ),
+                    )),
 
                     .specular = glm::vec3(0.5),
-                    .specular_map = Sampler2D(Texture2D::single_pixel()),
+                    .specular_map = Sampler2D::single_pixel(),
 
                     .shininess = 10
                 }

@@ -7,6 +7,7 @@
 
 namespace hw3 {
     static std::shared_ptr<Texture2D> single_pixel_texture;
+    static std::shared_ptr<Sampler2D> single_pixel_sampler;
 
     Texture2D::Texture2D(Texture2D&& other)
         : m_id(other.m_id), m_width(other.m_width), m_height(other.m_height) {
@@ -210,5 +211,13 @@ namespace hw3 {
         glBindTexture(GL_TEXTURE_2D, this->m_texture->id());
         glBindSampler(unit, this->m_id);
         handle_errors();
+    }
+
+    std::shared_ptr<Sampler2D> Sampler2D::single_pixel() {
+        if (!single_pixel_sampler) {
+            single_pixel_sampler = std::make_shared<Sampler2D>(Texture2D::single_pixel());
+        }
+
+        return single_pixel_sampler;
     }
 }

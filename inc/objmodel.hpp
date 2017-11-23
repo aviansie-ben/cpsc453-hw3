@@ -35,17 +35,18 @@ namespace hw3 {
 
     struct Material {
         glm::vec3 ambient;
-        Sampler2D ambient_occlusion_map;
+        std::shared_ptr<Sampler2D> ambient_occlusion_map;
 
         glm::vec3 diffuse;
-        Sampler2D diffuse_map;
+        std::shared_ptr<Sampler2D> diffuse_map;
 
         glm::vec3 specular;
-        Sampler2D specular_map;
+        std::shared_ptr<Sampler2D> specular_map;
 
         float shininess;
 
         Material without_maps() const;
+        Material without_ao() const;
     };
 
     template <>

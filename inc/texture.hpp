@@ -86,6 +86,8 @@ namespace hw3 {
 
         operator bool() const { return this->m_id != 0; }
         GLuint id() const { return this->m_id; }
+
+        static std::shared_ptr<Sampler2D> single_pixel();
     };
 }
 

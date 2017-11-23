@@ -78,13 +78,28 @@ namespace hw3 {
     Material Material::without_maps() const {
         return Material {
             .ambient = this->ambient,
-            .ambient_occlusion_map = Sampler2D(Texture2D::single_pixel()),
+            .ambient_occlusion_map = Sampler2D::single_pixel(),
 
             .diffuse = this->diffuse,
-            .diffuse_map = Sampler2D(Texture2D::single_pixel()),
+            .diffuse_map = Sampler2D::single_pixel(),
 
             .specular = this->specular,
-            .specular_map = Sampler2D(Texture2D::single_pixel()),
+            .specular_map = Sampler2D::single_pixel(),
+
+            .shininess = this->shininess
+        };
+    }
+
+    Material Material::without_ao() const {
+        return Material {
+            .ambient = this->ambient,
+            .ambient_occlusion_map = Sampler2D::single_pixel(),
+
+            .diffuse = this->diffuse,
+            .diffuse_map = this->diffuse_map,
+
+            .specular = this->specular,
+            .specular_map = this->specular_map,
 
             .shininess = this->shininess
         };
@@ -94,13 +109,13 @@ namespace hw3 {
         ShaderProgram& program, std::string name, const Material& value
     ) {
         program.set_uniform(name + ".ambient", value.ambient);
-        program.set_uniform(name + ".ambient_occlusion_map", &value.ambient_occlusion_map);
+        program.set_uniform(name + ".ambient_occlusion_map", value.ambient_occlusion_map.get());
 
         program.set_uniform(name + ".diffuse", value.diffuse);
-        program.set_uniform(name + ".diffuse_map", &value.diffuse_map);
+        program.set_uniform(name + ".diffuse_map", value.diffuse_map.get());
 
         program.set_uniform(name + ".specular", value.specular);
-        program.set_uniform(name + ".specular_map", &value.specular_map);
+        program.set_uniform(name + ".specular_map", value.specular_map.get());
 
         program.set_uniform(name + ".shininess", value.shininess);
     }

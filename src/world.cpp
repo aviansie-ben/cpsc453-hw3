@@ -37,16 +37,18 @@ namespace hw3 {
         program.set_uniform("vertex_world_transform", model_matrix);
         program.set_uniform("normal_transform", glm::transpose(glm::inverse(glm::mat3(model_matrix))));
 
-        if (render_settings.draw_textures) {
-            program.set_uniform("material", this->m_material);
+        {
+            Material m = this->m_material;
 
-            if (!render_settings.use_ambient_occlusion) {
-                Sampler2D blank(Texture2D::single_pixel());
-
-                program.set_uniform("material.ambient_occlusion_map", &blank);
+            if (!render_settings.draw_textures) {
+                m = m.without_maps();
+            } else {
+                if (!render_settings.use_ambient_occlusion) {
+                    m = m.without_ao();
+                }
             }
-        } else {
-            program.set_uniform("material", this->m_material.without_maps());
+
+            program.set_uniform("material", m);
         }
 
         program.use();
