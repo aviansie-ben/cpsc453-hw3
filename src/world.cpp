@@ -101,6 +101,14 @@ namespace hw3 {
             auto axis = glm::inverse(camera_orientation)
                 * glm::cross(last_posball, posball);
 
+            // If posball == last_posball, then glm::cross(posball, last_posball) will be the null
+            // vector and thus the axis of rotation will also be the null vector. Trying to rotate
+            // using the null vector as an axis causes the resulting rotation matrix to be full of
+            // NaNs, which breaks everything. Instead, we should just cancel the rotation.
+            if (axis == glm::vec3()) {
+                break;
+            }
+
             auto rotate_matrix = glm::mat3(glm::rotate(
                 glm::mat4(1),
                 angle,

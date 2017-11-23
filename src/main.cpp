@@ -117,6 +117,10 @@ namespace hw3 {
             .a2 = 0.1
         }));
 
+        float distance = calculate_camera_distance(model->bounding_box(), default_fov);
+
+        distance *= std::sqrt(2);
+
         window.set_mouse_button_callback([&](int button, int action, int mods) {
             if (button == GLFW_MOUSE_BUTTON_LEFT) {
                 if (action == GLFW_PRESS) {
@@ -192,16 +196,17 @@ namespace hw3 {
                 } else {
                     std::cout << "Ambient occlusion DISABLED" << std::endl;
                 }
+            } else if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+                world.camera()
+                    .pos(glm::vec3(distance, distance, 0))
+                    .look_at(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+                orbit.rotate_origin(glm::vec3(0, 0, 0));
             }
         });
 
         // We will be using the alpha channel, so we need to enable the correct blending mode.
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        float distance = calculate_camera_distance(model->bounding_box(), default_fov);
-
-        distance *= std::sqrt(2);
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
