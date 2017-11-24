@@ -45,7 +45,6 @@ namespace hw3 {
         Orientation m_orientation;
         float m_scale = 1.0f;
 
-        glm::mat4 transform_matrix() const;
     public:
         Object(std::shared_ptr<Model3D> model, Material material)
             : m_model(std::move(model)), m_material(std::move(material)) {}
@@ -67,6 +66,7 @@ namespace hw3 {
             return *this;
         }
 
+        glm::mat4 transform_matrix() const;
         AABB bounding_box() const;
 
         void draw(

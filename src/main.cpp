@@ -68,6 +68,7 @@ namespace hw3 {
         std::cout << "Scene loaded" << std::endl;
 
         float edit_speed = 1.0f;
+        int edit_object = -1;
 
         window.set_mouse_button_callback([&](int button, int action, int mods) {
             if (button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -164,6 +165,36 @@ namespace hw3 {
                 edit_speed *= 1.1f;
             } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
                 edit_speed /= 1.1f;
+            } else if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {
+                if ((mods & GLFW_MOD_SHIFT) == 0) {
+                    edit_object++;
+
+                    if (static_cast<size_t>(edit_object) == world.objects().size())
+                        edit_object = -1;
+                } else {
+                    edit_object--;
+
+                    if (edit_object == -2)
+                        edit_object = static_cast<int>(world.objects().size()) - 1;
+                }
+            } else if (key == GLFW_KEY_P && action == GLFW_PRESS && edit_object != -1) {
+                auto wrap_angle = [](float angle) {
+                    angle = std::remainder(angle, tau);
+
+                    return angle < 0 ? angle + tau : angle;
+                };
+
+                Object* o = world.objects()[edit_object].get();
+                auto pos = o->pos();
+                auto rot = o->orientation();
+                auto scale = o->scale();
+
+                std::cout << std::endl;
+                std::cout << "  pos " << pos.x << " " << pos.y << " " << pos.z << std::endl;
+                std::cout << "  rot " << wrap_angle(rot.yaw) << " "
+                                    << wrap_angle(rot.pitch) << " "
+                                    << wrap_angle(rot.roll) << std::endl;
+                std::cout << "  scale " << scale << std::endl;
             }
         });
 
@@ -190,44 +221,53 @@ namespace hw3 {
 
             shaders::point_program.set_uniform("point_half_size", glm::vec2(3.0) / window_size);
 
-            if (window.is_key_pressed(GLFW_KEY_LEFT_SHIFT) || window.is_key_pressed(GLFW_KEY_RIGHT_SHIFT)) {
-                if (window.is_key_pressed(GLFW_KEY_A))
-                    world.objects()[0]->orientation().yaw -= delta_t / 10 * tau * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_D))
-                    world.objects()[0]->orientation().yaw += delta_t / 10 * tau * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_W))
-                    world.objects()[0]->orientation().pitch -= delta_t / 10 * tau * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_S))
-                    world.objects()[0]->orientation().pitch += delta_t / 10 * tau * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_Q))
-                    world.objects()[0]->orientation().roll += delta_t / 10 * tau * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_E))
-                    world.objects()[0]->orientation().roll -= delta_t / 10 * tau * edit_speed;
-            } else {
-                if (window.is_key_pressed(GLFW_KEY_A))
-                    world.objects()[0]->pos().x -= delta_t * 1.5f * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_D))
-                    world.objects()[0]->pos().x += delta_t * 1.5f * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_W))
-                    world.objects()[0]->pos().z -= delta_t * 1.5f * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_S))
-                    world.objects()[0]->pos().z += delta_t * 1.5f * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_Q))
-                    world.objects()[0]->pos().y -= delta_t * 1.5f * edit_speed;
-                if (window.is_key_pressed(GLFW_KEY_E))
-                    world.objects()[0]->pos().y += delta_t * 1.5f * edit_speed;
+            if (edit_object >= 0) {
+                if (window.is_key_pressed(GLFW_KEY_LEFT_SHIFT) || window.is_key_pressed(GLFW_KEY_RIGHT_SHIFT)) {
+                    if (window.is_key_pressed(GLFW_KEY_A))
+                        world.objects()[edit_object]->orientation().yaw -= delta_t / 10 * tau * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_D))
+                        world.objects()[edit_object]->orientation().yaw += delta_t / 10 * tau * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_W))
+                        world.objects()[edit_object]->orientation().pitch -= delta_t / 10 * tau * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_S))
+                        world.objects()[edit_object]->orientation().pitch += delta_t / 10 * tau * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_Q))
+                        world.objects()[edit_object]->orientation().roll += delta_t / 10 * tau * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_E))
+                        world.objects()[edit_object]->orientation().roll -= delta_t / 10 * tau * edit_speed;
+                } else {
+                    if (window.is_key_pressed(GLFW_KEY_A))
+                        world.objects()[edit_object]->pos().x -= delta_t * 1.5f * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_D))
+                        world.objects()[edit_object]->pos().x += delta_t * 1.5f * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_W))
+                        world.objects()[edit_object]->pos().z -= delta_t * 1.5f * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_S))
+                        world.objects()[edit_object]->pos().z += delta_t * 1.5f * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_Q))
+                        world.objects()[edit_object]->pos().y -= delta_t * 1.5f * edit_speed;
+                    if (window.is_key_pressed(GLFW_KEY_E))
+                        world.objects()[edit_object]->pos().y += delta_t * 1.5f * edit_speed;
+                }
+
+                if (window.is_key_pressed(GLFW_KEY_Z))
+                    world.objects()[edit_object]->scale(
+                        world.objects()[edit_object]->scale() * std::pow(1.5f, delta_t * edit_speed)
+                    );
+                if (window.is_key_pressed(GLFW_KEY_X))
+                    world.objects()[edit_object]->scale(
+                        world.objects()[edit_object]->scale() / std::pow(1.5f, delta_t * edit_speed)
+                    );
             }
 
-            if (window.is_key_pressed(GLFW_KEY_Z))
-                world.objects()[0]->scale(
-                    world.objects()[0]->scale() * std::pow(1.5f, delta_t * edit_speed)
-                );
-            if (window.is_key_pressed(GLFW_KEY_X))
-                world.objects()[0]->scale(
-                    world.objects()[0]->scale() / std::pow(1.5f, delta_t * edit_speed)
-                );
-
             world.draw();
+
+            if (edit_object >= 0) {
+                world.objects()[edit_object]->model()->bounding_box().draw(
+                    world.camera().view_projection_matrix() * world.objects()[edit_object]->transform_matrix(),
+                    glm::vec4(1)
+                );
+            }
         });
 
         return 0;
