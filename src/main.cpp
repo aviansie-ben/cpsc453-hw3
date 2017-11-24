@@ -35,8 +35,8 @@ namespace hw3 {
     }
 
     extern "C" int main(int argc, char** argv) {
-        if (argc < 2 || argc > 4) {
-            std::cerr << "Usage: " << argv[0] << " <object file> [texture] [ambient map]" << std::endl;
+        if (argc != 2) {
+            std::cerr << "Usage: " << argv[0] << " <scene file>" << std::endl;
             return 1;
         }
 
@@ -53,69 +53,19 @@ namespace hw3 {
 
         shaders::init();
 
-        std::shared_ptr<Model3D> model = std::make_shared<Model3D>();
-
-        model->load_geometry(boost::filesystem::path(argv[1]));
-
-        std::cout << "Loaded " << model->num_vertices() << " vertices from " << argv[1] << std::endl;
-
         World world;
         OrbitControls orbit(&world.camera());
 
         glm::vec2 window_size = glm::vec2(window.size());
 
+        world.load_scene(boost::filesystem::path(argv[1]));
         world.camera().projection_matrix(glm::infinitePerspective(
             default_fov,
             window_size.x / window_size.y,
             0.1f
         ));
 
-        world.objects().emplace_back(([&]() {
-            auto diffuse_tex = argc >= 3
-                ? std::make_shared<Texture2D>(Texture2D::load_from_file(argv[2]))
-                : Texture2D::single_pixel();
-            diffuse_tex->generate_mipmap();
-
-            auto ao_tex = argc >= 4
-                ? std::make_shared<Texture2D>(Texture2D::load_from_file(argv[3]))
-                : Texture2D::single_pixel();
-            ao_tex->generate_mipmap();
-
-            auto obj = std::make_unique<Object>(
-                model,
-                Material {
-                    .ambient = glm::vec3(0.5),
-                    .ambient_occlusion_map = std::make_shared<Sampler2D>(std::move(
-                        Sampler2D(ao_tex)
-                            .set_sample_mode(TextureSampleMode::LINEAR, TextureSampleMode::LINEAR_MIPMAP_LINEAR)
-                    )),
-
-                    .diffuse = glm::vec3(0.5),
-                    .diffuse_map = std::make_shared<Sampler2D>(std::move(
-                        Sampler2D(diffuse_tex)
-                            .set_sample_mode(TextureSampleMode::LINEAR, TextureSampleMode::LINEAR_MIPMAP_LINEAR)
-                    )),
-
-                    .specular = glm::vec3(0.5),
-                    .specular_map = Sampler2D::single_pixel(),
-
-                    .shininess = 10
-                }
-            );
-
-            return obj;
-        })());
-        world.point_lights().push_back(std::make_unique<PointLight>(PointLight {
-            .pos = glm::vec3(2),
-
-            .ambient = glm::vec3(0.3),
-            .diffuse = glm::vec3(1),
-            .specular = glm::vec3(0.8),
-
-            .a0 = 1,
-            .a1 = 0,
-            .a2 = 0.1
-        }));
+        std::cout << "Scene loaded" << std::endl;
 
         float edit_speed = 1.0f;
 
@@ -194,14 +144,14 @@ namespace hw3 {
                     std::cout << "Ambient occlusion DISABLED" << std::endl;
                 }
             } else if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-                auto obj_aabb = world.objects()[0]->bounding_box();
-                auto obj_center = world.objects()[0]->pos() + obj_aabb.center();
-                float distance = calculate_camera_distance(model->bounding_box(), default_fov);
+                auto aabb = world.bounding_box();
+                auto center = aabb.center();
+                float distance = calculate_camera_distance(aabb, default_fov);
 
                 world.camera()
-                    .pos(obj_center + glm::vec3(0, 0, distance))
-                    .look_at(obj_center, glm::vec3(0, 1, 0));
-                orbit.rotate_origin(obj_center);
+                    .pos(center + glm::vec3(0, 0, distance))
+                    .look_at(center, glm::vec3(0, 1, 0));
+                orbit.rotate_origin(center);
             } else if (key == GLFW_KEY_I && action == GLFW_PRESS) {
                 edit_speed *= 1.1f;
             } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
@@ -217,14 +167,14 @@ namespace hw3 {
         glDepthFunc(GL_LEQUAL);
 
         {
-            auto obj_aabb = world.objects()[0]->bounding_box();
-            auto obj_center = world.objects()[0]->pos() + obj_aabb.center();
-            float distance = calculate_camera_distance(obj_aabb, default_fov);
+            auto aabb = world.bounding_box();
+            auto center = aabb.center();
+            float distance = calculate_camera_distance(aabb, default_fov);
 
             world.camera()
-                .pos(obj_center + glm::vec3(0, 0, distance))
-                .look_at(obj_center, glm::vec3(0, 1, 0));
-            orbit.rotate_origin(obj_center);
+                .pos(center + glm::vec3(0, 0, distance))
+                .look_at(center, glm::vec3(0, 1, 0));
+            orbit.rotate_origin(center);
         }
 
         window.do_main_loop([&](double delta_t) {

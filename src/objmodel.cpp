@@ -49,6 +49,19 @@ namespace hw3 {
         return box_va;
     }
 
+    std::array<glm::vec3, 8> AABB::corners() const {
+        return std::array<glm::vec3, 8> {
+            this->m_min,
+            glm::vec3(this->m_max.x, this->m_min.y, this->m_min.z),
+            glm::vec3(this->m_min.x, this->m_max.y, this->m_min.z),
+            glm::vec3(this->m_max.x, this->m_max.y, this->m_min.z),
+            glm::vec3(this->m_min.x, this->m_min.y, this->m_max.z),
+            glm::vec3(this->m_max.x, this->m_min.y, this->m_max.z),
+            glm::vec3(this->m_min.x, this->m_max.y, this->m_max.z),
+            this->m_max
+        };
+    }
+
     void AABB::draw(const glm::mat4& transform, glm::vec4 colour) const {
         shaders::fixed_program.set_uniform(
             "vertex_transform",
@@ -73,6 +86,26 @@ namespace hw3 {
         } else {
             return AABB(aabb.max() * scale, aabb.min() * scale);
         }
+    }
+
+    AABB operator*(const glm::mat4& tf, const AABB& aabb) {
+        glm::vec3 min(std::numeric_limits<float>::infinity());
+        glm::vec3 max(-std::numeric_limits<float>::infinity());
+
+        for (auto& v : aabb.corners()) {
+            v = glm::vec3(tf * glm::vec4(v, 1));
+
+            if (v.x < min.x) min.x = v.x;
+            if (v.x > max.x) max.x = v.x;
+
+            if (v.y < min.y) min.y = v.y;
+            if (v.y > max.y) max.y = v.y;
+
+            if (v.z < min.z) min.z = v.z;
+            if (v.z > max.z) max.z = v.z;
+        }
+
+        return AABB(min, max);
     }
 
     Material Material::without_maps() const {
@@ -270,7 +303,7 @@ namespace hw3 {
 
         std::vector<std::string> parts;
 
-        boost::split(parts, line, boost::is_any_of(" \t"));
+        boost::split(parts, line, boost::is_any_of(" \t"), boost::token_compress_on);
 
         if (parts[0] == "v") {
             if (parts.size() != 4) {

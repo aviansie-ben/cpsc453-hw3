@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/filesystem.hpp>
 #include <glm/glm.hpp>
 
 #include "objmodel.hpp"
@@ -189,6 +190,10 @@ namespace hw3 {
 
         Camera& camera() { return this->m_camera; }
         const Camera& camera() const { return this->m_camera; }
+
+        AABB bounding_box() const;
+
+        World& load_scene(boost::filesystem::path path);
 
         void draw() const;
     };

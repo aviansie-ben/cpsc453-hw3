@@ -24,6 +24,8 @@ namespace hw3 {
         const glm::vec3& min() const { return this->m_min; }
         const glm::vec3& max() const { return this->m_max; }
 
+        std::array<glm::vec3, 8> corners() const;
+
         glm::vec3 size() const { return this->m_max - this->m_min; }
         glm::vec3 center() const { return (this->m_min + this->m_max) / 2.0f; }
 
@@ -32,6 +34,9 @@ namespace hw3 {
 
     AABB operator*(float scale, const AABB& aabb);
     inline AABB operator*(const AABB& aabb, float scale) { return scale * aabb; }
+
+    AABB operator*(const glm::mat4& tf, const AABB& aabb);
+    inline AABB operator*(const AABB& aabb, const glm::mat4& tf) { return tf * aabb; }
 
     struct Material {
         glm::vec3 ambient;
