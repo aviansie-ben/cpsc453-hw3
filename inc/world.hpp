@@ -34,6 +34,7 @@ namespace hw3 {
         bool use_ambient_occlusion = true;
         bool draw_textures = true;
         bool draw_bounding_boxes = false;
+        bool draw_lights = false;
     };
 
     class Object {

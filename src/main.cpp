@@ -127,6 +127,14 @@ namespace hw3 {
                 } else {
                     std::cout << "Bounding boxes DISABLED" << std::endl;
                 }
+            } else if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+                world.render_settings().draw_lights = !world.render_settings().draw_lights;
+
+                if (world.render_settings().draw_lights) {
+                    std::cout << "Light display ENABLED" << std::endl;
+                } else {
+                    std::cout << "Light display DISABLED" << std::endl;
+                }
             } else if (key == GLFW_KEY_T && action == GLFW_PRESS) {
                 world.render_settings().draw_textures = !world.render_settings().draw_textures;
 
@@ -179,6 +187,8 @@ namespace hw3 {
 
         window.do_main_loop([&](double delta_t) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            shaders::point_program.set_uniform("point_half_size", glm::vec2(3.0) / window_size);
 
             if (window.is_key_pressed(GLFW_KEY_LEFT_SHIFT) || window.is_key_pressed(GLFW_KEY_RIGHT_SHIFT)) {
                 if (window.is_key_pressed(GLFW_KEY_A))

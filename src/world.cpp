@@ -6,6 +6,8 @@
 #include "world.hpp"
 
 namespace hw3 {
+    static GlVertexArray single_point_array;
+
     glm::mat4 Orientation::apply(const glm::mat4& transform) const {
         return glm::rotate(
             glm::rotate(
@@ -745,6 +747,26 @@ namespace hw3 {
 
         if (this->m_render_settings.draw_bounding_boxes && this->m_objects.size() > 1) {
             this->bounding_box().draw(view_projection_matrix, glm::vec4(0, 1, 0, 1));
+        }
+
+        if (this->m_render_settings.draw_lights) {
+            if (!single_point_array) {
+                single_point_array = GlVertexArray(1, 1);
+                single_point_array.buffer(0).load_data<glm::vec3>({
+                    glm::vec3(0)
+                }, GL_STATIC_DRAW);
+                single_point_array.bind_attribute(0, 3, DataType::FLOAT, 0, 0, 0);
+            }
+
+            for (const auto& pl : this->m_point_lights) {
+                shaders::point_program.set_uniform("fixed_color", glm::vec4(pl->diffuse, 1));
+                shaders::point_program.set_uniform(
+                    "vertex_transform",
+                    glm::translate(view_projection_matrix, pl->pos)
+                );
+                shaders::point_program.use();
+                single_point_array.draw(PrimitiveType::POINTS);
+            }
         }
     }
 }
