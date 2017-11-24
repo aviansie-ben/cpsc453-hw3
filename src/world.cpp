@@ -424,6 +424,10 @@ namespace hw3 {
                             this->resolve_path(this->m_current_line[1]).native()
                         ))
                     );
+                    material.ambient_occlusion_map->set_sample_mode(
+                        TextureSampleMode::LINEAR,
+                        TextureSampleMode::LINEAR
+                    );
                 } else if (cmd == "diffuse_map") {
                     if (this->m_current_line.size() != 2) {
                         throw this->syntax_error([&](auto& ss) {
@@ -436,6 +440,10 @@ namespace hw3 {
                             this->resolve_path(this->m_current_line[1]).native()
                         ))
                     );
+                    material.diffuse_map->set_sample_mode(
+                        TextureSampleMode::LINEAR,
+                        TextureSampleMode::LINEAR
+                    );
                 } else if (cmd == "specular_map") {
                     if (this->m_current_line.size() != 2) {
                         throw this->syntax_error([&](auto& ss) {
@@ -447,6 +455,10 @@ namespace hw3 {
                         std::make_shared<Texture2D>(Texture2D::load_from_file(
                             this->resolve_path(this->m_current_line[1]).native()
                         ))
+                    );
+                    material.specular_map->set_sample_mode(
+                        TextureSampleMode::LINEAR,
+                        TextureSampleMode::LINEAR
                     );
                 } else {
                     throw this->syntax_error([&](auto& ss) {
