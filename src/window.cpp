@@ -154,6 +154,7 @@ namespace hw3 {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
 
         Cursor::standard_arrow = Cursor(glfwCreateStandardCursor(GLFW_ARROW_CURSOR));
         Cursor::standard_ibeam = Cursor(glfwCreateStandardCursor(GLFW_IBEAM_CURSOR));
