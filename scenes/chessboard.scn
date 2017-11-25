@@ -157,7 +157,7 @@ plight
   ambient 1 0.8 0.5
   diffuse 1 0.8 0.5
   specular 1 0.8 0.5
-  atten 1 0 2
+  atten 1 0 8
 
 plight
   pos 0 6 0
@@ -165,7 +165,7 @@ plight
   ambient 1 0.6 0
   diffuse 1 0.6 0
   specular 1 0.6 0
-  atten 2 0 0.4
+  atten 64 0 0.4
 
 obj
   mdl table

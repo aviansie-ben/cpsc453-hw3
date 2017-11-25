@@ -91,5 +91,10 @@ void main() {
         result += calc_point_light(point_lights[i], view_dir, normal);
     }
 
-    frag_color = vec4(result, 1.0);
+    frag_color = vec4(
+        pow(result.r, 1.0/2.2),
+        pow(result.g, 1.0/2.2),
+        pow(result.b, 1.0/2.2),
+        1.0
+    );
 }

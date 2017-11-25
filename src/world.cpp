@@ -428,7 +428,8 @@ namespace hw3 {
 
                     material.ambient_occlusion_map = std::make_shared<Sampler2D>(
                         std::make_shared<Texture2D>(Texture2D::load_from_file(
-                            this->resolve_path(this->m_current_line[1]).native()
+                            this->resolve_path(this->m_current_line[1]).native(),
+                            TextureDataFormat::SRGBA
                         ))
                     );
                     material.ambient_occlusion_map->set_sample_mode(
@@ -444,7 +445,8 @@ namespace hw3 {
 
                     material.diffuse_map = std::make_shared<Sampler2D>(
                         std::make_shared<Texture2D>(Texture2D::load_from_file(
-                            this->resolve_path(this->m_current_line[1]).native()
+                            this->resolve_path(this->m_current_line[1]).native(),
+                            TextureDataFormat::SRGBA
                         ))
                     );
                     material.diffuse_map->set_sample_mode(
@@ -460,7 +462,8 @@ namespace hw3 {
 
                     material.specular_map = std::make_shared<Sampler2D>(
                         std::make_shared<Texture2D>(Texture2D::load_from_file(
-                            this->resolve_path(this->m_current_line[1]).native()
+                            this->resolve_path(this->m_current_line[1]).native(),
+                            TextureDataFormat::SRGBA
                         ))
                     );
                     material.specular_map->set_sample_mode(

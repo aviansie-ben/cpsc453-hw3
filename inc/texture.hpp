@@ -29,9 +29,10 @@ namespace hw3 {
         MIRROR_REPEAT = GL_MIRRORED_REPEAT
     };
 
-    enum class TextureDataFormat : GLenum {
-        GRAYSCALE = GL_RED,
-        RGBA = GL_RGBA
+    enum class TextureDataFormat {
+        GRAYSCALE,
+        RGBA,
+        SRGBA
     };
 
     class Texture2D {
@@ -59,7 +60,7 @@ namespace hw3 {
         operator bool() const { return this->m_id != 0; }
         GLuint id() const { return this->m_id; }
 
-        static Texture2D load_from_file(std::string path);
+        static Texture2D load_from_file(std::string path, TextureDataFormat data_format);
         static std::shared_ptr<Texture2D> single_pixel();
     };
 

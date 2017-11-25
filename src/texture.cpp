@@ -40,7 +40,7 @@ namespace hw3 {
         return *this;
     }
 
-    Texture2D& Texture2D::load_data(const char* data, TextureDataFormat format, int width, int height) {
+    Texture2D& Texture2D::load_data(const char* data, TextureDataFormat data_format, int width, int height) {
         if (this->m_id == 0) {
             glGenTextures(1, &this->m_id);
 
@@ -54,12 +54,32 @@ namespace hw3 {
         glBindTexture(GL_TEXTURE_2D, this->m_id);
         handle_errors();
 
+        GLenum format;
+        GLenum internal_format;
+
+        switch (data_format) {
+        case TextureDataFormat::GRAYSCALE:
+            format = GL_RED;
+            internal_format = GL_RED;
+            break;
+        case TextureDataFormat::RGBA:
+            format = GL_RGBA;
+            internal_format = GL_RGBA;
+            break;
+        case TextureDataFormat::SRGBA:
+            format = GL_RGBA;
+            internal_format = GL_SRGB_ALPHA;
+            break;
+        default:
+            throw std::runtime_error("Unknown texture format");
+        }
+
         if (data == nullptr) {
             std::vector<glm::vec4> clear_data(width * height, glm::vec4(0));
 
-            glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, clear_data.data());
+            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, clear_data.data());
         } else {
-            glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)format, width, height, 0, (GLenum)format, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         }
 
         handle_errors();
@@ -70,7 +90,7 @@ namespace hw3 {
         return *this;
     }
 
-    Texture2D& Texture2D::load_subimage_data(const char* data, TextureDataFormat format, int x, int y, int width, int height) {
+    Texture2D& Texture2D::load_subimage_data(const char* data, TextureDataFormat data_format, int x, int y, int width, int height) {
         assert(this->m_id != 0);
         assert((x + width) <= this->m_width);
         assert((y + height) <= this->m_height);
@@ -78,6 +98,20 @@ namespace hw3 {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->m_id);
         handle_errors();
+
+        GLenum format;
+
+        switch (data_format) {
+        case TextureDataFormat::GRAYSCALE:
+            format = GL_RED;
+            break;
+        case TextureDataFormat::RGBA:
+        case TextureDataFormat::SRGBA:
+            format = GL_RGBA;
+            break;
+        default:
+            throw std::runtime_error("Unknown texture format");
+        }
 
         glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, (GLenum)format, GL_UNSIGNED_BYTE, data);
         handle_errors();
@@ -94,9 +128,20 @@ namespace hw3 {
         return *this;
     }
 
-    Texture2D Texture2D::load_from_file(std::string path) {
+    Texture2D Texture2D::load_from_file(std::string path, TextureDataFormat data_format) {
         int width, height, channels;
-        char* data = reinterpret_cast<char*>(stbi_load(path.c_str(), &width, &height, &channels, 4));
+
+        switch (data_format) {
+        case TextureDataFormat::GRAYSCALE:
+            channels = 1;
+            break;
+        case TextureDataFormat::RGBA:
+        case TextureDataFormat::SRGBA:
+            channels = 4;
+            break;
+        }
+
+        char* data = reinterpret_cast<char*>(stbi_load(path.c_str(), &width, &height, &channels, channels));
 
         if (data == nullptr) {
             throw std::runtime_error(([&]() {
@@ -109,7 +154,7 @@ namespace hw3 {
 
         Texture2D tex = std::move(
             Texture2D()
-                .load_data(data, TextureDataFormat::RGBA, width, height)
+                .load_data(data, data_format, width, height)
                 .generate_mipmap()
         );
 
