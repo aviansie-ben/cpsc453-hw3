@@ -355,6 +355,12 @@ namespace hw3 {
             });
         }
 
+        if (this->m_materials.find(this->m_current_line[1]) != this->m_materials.end()) {
+            throw this->syntax_error([&](auto& ss) {
+                ss << "A material \"" << this->m_current_line[1] << "\" already exists";
+            });
+        }
+
         auto name = this->m_current_line[1];
         size_t indent = this->m_current_indent;
 
