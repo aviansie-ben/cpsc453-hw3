@@ -235,6 +235,7 @@ namespace hw3 {
 
         void parse_mdl();
         void parse_mtl();
+        void parse_alight();
         void parse_plight();
         void parse_obj();
     public:
@@ -471,6 +472,24 @@ namespace hw3 {
         this->m_materials[name] = std::move(material);
     }
 
+    void SceneLoader::parse_alight() {
+        if (this->m_current_line.size() != 4) {
+            throw this->syntax_error([&](auto& ss) {
+                ss << "Wrong number of arguments for alight command";
+            });
+        }
+
+        try {
+            this->m_world->ambient_light(this->read_vec3(1));
+        } catch (std::exception& e) {
+            throw this->syntax_error([&](auto& ss) {
+                ss << "Invalid argument for alight command";
+            });
+        }
+
+        this->read_next_line();
+    }
+
     void SceneLoader::parse_plight() {
         if (this->m_current_line.size() != 1) {
             throw this->syntax_error([&](auto& ss) {
@@ -681,6 +700,8 @@ namespace hw3 {
                 this->parse_mdl();
             } else if (cmd == "mtl") {
                 this->parse_mtl();
+            } else if (cmd == "alight") {
+                this->parse_alight();
             } else if (cmd == "plight") {
                 this->parse_plight();
             } else if (cmd == "obj") {
@@ -708,6 +729,7 @@ namespace hw3 {
 
         this->m_objects.clear();
         this->m_point_lights.clear();
+        this->m_ambient_light = glm::vec3(0, 0, 0);
 
         SceneLoader loader(this, &f, path.parent_path());
 
@@ -737,7 +759,7 @@ namespace hw3 {
         }
 
         if (this->m_render_settings.mode == RenderMode::STANDARD) {
-            program.set_uniform("scene_ambient", glm::vec3(0));
+            program.set_uniform("scene_ambient", this->m_ambient_light);
             program.set_uniform("num_point_lights", static_cast<int>(this->m_point_lights.size()));
             for (size_t i = 0; i < this->m_point_lights.size(); i++) {
                 program.set_uniform(([&]() {

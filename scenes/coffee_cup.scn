@@ -8,6 +8,8 @@ mtl cup
   diffuse_map models/coffee_cup/coffee_cup.colour.png
   ao_map models/coffee_cup/coffee_cup.ao.png
 
+alight 0.2 0.2 0.2
+
 plight
   pos 2 1.5 2
 

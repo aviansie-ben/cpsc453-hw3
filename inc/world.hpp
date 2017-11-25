@@ -169,6 +169,7 @@ namespace hw3 {
     class World {
         std::vector<std::unique_ptr<Object>> m_objects;
         std::vector<std::unique_ptr<PointLight>> m_point_lights;
+        glm::vec3 m_ambient_light;
 
         RenderSettings m_render_settings;
 
@@ -184,6 +185,12 @@ namespace hw3 {
         std::vector<std::unique_ptr<PointLight>>& point_lights() { return this->m_point_lights; }
         const std::vector<std::unique_ptr<PointLight>>& point_lights() const {
             return this->m_point_lights;
+        }
+
+        glm::vec3 ambient_light() const { return this->m_ambient_light; }
+        World& ambient_light(glm::vec3 ambient_light) {
+            this->m_ambient_light = ambient_light;
+            return *this;
         }
 
         RenderSettings& render_settings() { return this->m_render_settings; }
