@@ -38,12 +38,12 @@ namespace hw3 {
 
     Text Font::create_text(std::string text) const {
         struct VertData {
-            glm::vec2 pos;
+            glm::vec3 pos;
             glm::vec2 texcoord;
         };
 
         std::vector<VertData> vertices;
-        std::vector<unsigned short> indices;
+        std::vector<unsigned int> indices;
 
         vertices.reserve(text.length() * 4);
         indices.reserve(text.length() * 6);
@@ -51,7 +51,7 @@ namespace hw3 {
         glm::vec2 tex_size = this->m_sampler.texture()->size();
         float x = 0.0;
         float y = this->m_line_first;
-        unsigned short i = 0;
+        unsigned int i = 0;
 
         float max_x = 0.0;
 
@@ -79,29 +79,29 @@ namespace hw3 {
             max_x = std::max(max_x, xo + w);
 
             vertices.push_back({
-                glm::vec2(xo, yo),
+                glm::vec3(xo, yo, 0),
                 glm::vec2(glyph.texture_x, 0)
             });
             vertices.push_back({
-                glm::vec2(xo + w, yo),
+                glm::vec3(xo + w, yo, 0),
                 glm::vec2(glyph.texture_x + w / tex_size.x, 0)
             });
             vertices.push_back({
-                glm::vec2(xo + w, yo + h),
+                glm::vec3(xo + w, yo + h, 0),
                 glm::vec2(glyph.texture_x + w / tex_size.x, h / tex_size.y)
             });
             vertices.push_back({
-                glm::vec2(xo, yo + h),
+                glm::vec3(xo, yo + h, 0),
                 glm::vec2(glyph.texture_x, h / tex_size.y)
             });
 
             indices.insert(indices.end(), {
                 i,
-                static_cast<unsigned short>(i + 1),
-                static_cast<unsigned short>(i + 3),
-                static_cast<unsigned short>(i + 1),
-                static_cast<unsigned short>(i + 3),
-                static_cast<unsigned short>(i + 2)
+                static_cast<unsigned int>(i + 1),
+                static_cast<unsigned int>(i + 3),
+                static_cast<unsigned int>(i + 1),
+                static_cast<unsigned int>(i + 3),
+                static_cast<unsigned int>(i + 2)
             });
 
             i += 4;
@@ -111,8 +111,8 @@ namespace hw3 {
 
         va.buffer(0).load_data(vertices, GL_STATIC_DRAW);
         va.buffer(1).load_data(indices, GL_STATIC_DRAW);
-        va.bind_attribute(0, 2, DataType::FLOAT, sizeof(float) * 4, 0, 0);
-        va.bind_attribute(1, 2, DataType::FLOAT, sizeof(float) * 4, sizeof(float) * 2, 0);
+        va.bind_attribute(0, 3, DataType::FLOAT, sizeof(VertData), offsetof(VertData, pos), 0);
+        va.bind_attribute(1, 2, DataType::FLOAT, sizeof(VertData), offsetof(VertData, texcoord), 0);
 
         return Text(std::move(va), this, glm::vec2(max_x, y + this->m_line_height - this->m_line_first));
     }

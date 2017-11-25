@@ -34,6 +34,63 @@ namespace hw3 {
         return glm::vec2(screen_coord.x, win_size.y - screen_coord.y) / win_size * 2.0f - glm::vec2(1, 1);
     }
 
+    class HelpText {
+        Font m_font;
+
+        Text m_upper_text;
+        Text m_lower_text;
+
+        void ensure_font() {
+            if (!this->m_font.sampler()) {
+                this->m_font = Font::load_font("Monospace", 24.0);
+            }
+        }
+    public:
+        void set_upper_text(const std::string& text) {
+            this->ensure_font();
+            this->m_upper_text = this->m_font.create_text(text);
+        }
+
+        void set_lower_text(const std::string& text) {
+            this->ensure_font();
+            this->m_lower_text = this->m_font.create_text(text);
+        }
+
+        void draw(glm::vec2 screen_size) const {
+            if (this->m_upper_text) {
+                this->m_upper_text.draw(
+                    glm::translate(
+                        glm::scale(
+                            glm::translate(
+                                glm::mat4(1.0),
+                                glm::vec3(-1.0, 1.0, 0.0)
+                            ),
+                            glm::vec3(1 / screen_size.x, -1 / screen_size.y, 1)
+                        ),
+                        glm::vec3(10, 10, 0)
+                    ),
+                    glm::vec4(1, 1, 1, 1)
+                );
+            }
+
+            if (this->m_lower_text) {
+                this->m_lower_text.draw(
+                    glm::translate(
+                        glm::scale(
+                            glm::translate(
+                                glm::mat4(1.0),
+                                glm::vec3(-1.0, -1.0, 0.0)
+                            ),
+                            glm::vec3(1 / screen_size.x, -1 / screen_size.y, 1)
+                        ),
+                        glm::vec3(10, -(10 + this->m_lower_text.size().y), 0)
+                    ),
+                    glm::vec4(1, 1, 1, 1)
+                );
+            }
+        }
+    };
+
     extern "C" int main(int argc, char** argv) {
         if (argc != 2) {
             std::cerr << "Usage: " << argv[0] << " <scene file>" << std::endl;
@@ -55,6 +112,8 @@ namespace hw3 {
 
         World world;
         OrbitControls orbit(&world.camera());
+        HelpText help_text;
+        bool show_help = true;
 
         glm::vec2 window_size = glm::vec2(window.size());
 
@@ -66,6 +125,9 @@ namespace hw3 {
         ));
 
         std::cout << "Scene loaded" << std::endl;
+
+        help_text.set_upper_text("<R> Switch Render Mode\n<B> Show/Hide Bounding Boxes\n<L> Show/Hide Lights\n<T> Enable/Disable Textures\n<O> Enable/Disable AO\n<C> Reset Camera\n<H> Show/Hide Help");
+        help_text.set_lower_text("No object selected\nUse TAB and SHIFT+TAB to select an object");
 
         float edit_speed = 1.0f;
         int edit_object = -1;
@@ -177,6 +239,12 @@ namespace hw3 {
                     if (edit_object == -2)
                         edit_object = static_cast<int>(world.objects().size()) - 1;
                 }
+
+                if (edit_object == -1) {
+                    help_text.set_lower_text("No object selected\nUse TAB and SHIFT+TAB to select an object");
+                } else {
+                    help_text.set_lower_text("Use WASDQE to translate\nHold SHIFT and use WASDQE to rotate\nUse ZX to scale\nUse IK to adjust edit speed\nPress P to print object debug info\nUse TAB and SHIFT+TAB to select an object");
+                }
             } else if (key == GLFW_KEY_P && action == GLFW_PRESS && edit_object != -1) {
                 auto wrap_angle = [](float angle) {
                     angle = std::remainder(angle, tau);
@@ -195,6 +263,8 @@ namespace hw3 {
                                     << wrap_angle(rot.pitch) << " "
                                     << wrap_angle(rot.roll) << std::endl;
                 std::cout << "  scale " << scale << std::endl;
+            } else if (key == GLFW_KEY_H && action == GLFW_PRESS) {
+                show_help = !show_help;
             }
         });
 
@@ -204,7 +274,6 @@ namespace hw3 {
 
         glEnable(GL_MULTISAMPLE);
 
-        glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
 
         {
@@ -262,6 +331,7 @@ namespace hw3 {
                     );
             }
 
+            glEnable(GL_DEPTH_TEST);
             world.draw();
 
             if (edit_object >= 0) {
@@ -269,6 +339,11 @@ namespace hw3 {
                     world.camera().view_projection_matrix() * world.objects()[edit_object]->transform_matrix(),
                     glm::vec4(1)
                 );
+            }
+
+            if (show_help) {
+                glDisable(GL_DEPTH_TEST);
+                help_text.draw(window_size);
             }
         });
 
