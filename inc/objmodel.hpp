@@ -13,8 +13,8 @@
 
 namespace hw3 {
     class AABB {
-        glm::vec3 m_min;
-        glm::vec3 m_max;
+        glm::vec3 m_min = glm::vec3(0);
+        glm::vec3 m_max = glm::vec3(0);
 
         static const GlVertexArray& box_geometry();
     public:

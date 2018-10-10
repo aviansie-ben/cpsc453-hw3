@@ -41,7 +41,7 @@ namespace hw3 {
         std::shared_ptr<Model3D> m_model;
         Material m_material;
 
-        glm::vec3 m_pos;
+        glm::vec3 m_pos = glm::vec3(0);
         Orientation m_orientation;
         float m_scale = 1.0f;
 
@@ -94,8 +94,8 @@ namespace hw3 {
     };
 
     class Camera {
-        glm::mat4 m_view_matrix;
-        glm::mat4 m_projection_matrix;
+        glm::mat4 m_view_matrix = glm::mat4(1.0f);
+        glm::mat4 m_projection_matrix = glm::mat4(1.0f);
     public:
         Camera() {}
         Camera(const glm::mat4& view_matrix) : m_view_matrix(view_matrix) {}
@@ -142,7 +142,7 @@ namespace hw3 {
         };
 
         Camera* m_camera = nullptr;
-        glm::vec3 m_rotate_origin;
+        glm::vec3 m_rotate_origin = glm::vec3(0);
 
         glm::vec2 m_last_pos;
         OrbitState m_state = OrbitState::NONE;
